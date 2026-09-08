@@ -1,0 +1,45 @@
+import { ArrowLeft, ArrowUpRight, BedDouble, Check, ChevronDown, Filter, MapPin, Search, SlidersHorizontal, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Link } from "wouter";
+import { formatBRLFromCents } from "@/lib/currency";
+
+const WHATSAPP = "5562995111648";
+const catalogProperties = [
+  { id: "01310", title: "Casa dos Sonhos", type: "Casa", saleType: "Financiamento", location: "Senador Canedo · Jardim das Oliveiras", price: 42000000, status: "disponivel", available: 1, total: null, bedrooms: 3, area: "148 m²", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=85" },
+  { id: "01304", title: "Casa térrea com jardim", type: "Casa", saleType: "Financiamento", location: "Senador Canedo · Residencial Anápolis", price: 35000000, status: "reservado", available: 1, total: null, bedrooms: 2, area: "92 m²", image: "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1000&q=85" },
+  { id: "01288", title: "Chácara Recanto Verde", type: "Chácara", saleType: "Pagamento Facilitado", location: "Bela Vista de Goiás · 28 min de Senador Canedo", price: 26500000, status: "disponivel", available: 4, total: 12, bedrooms: 3, area: "1.200 m²", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=85" },
+  { id: "01270", title: "Lote Jardim Boa Vista", type: "Loteamento", saleType: "Ágio", location: "Senador Canedo · Jardim Boa Vista", price: 9900000, status: "disponivel", available: 18, total: 40, bedrooms: 0, area: "240 m²", image: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1000&q=85" },
+  { id: "01261", title: "Galpão Nova Cidade", type: "Comercial", saleType: "Pagamento Facilitado", location: "Senador Canedo · Nova Cidade", price: 78000000, status: "vendido", available: 0, total: null, bedrooms: 0, area: "480 m²", image: "https://images.unsplash.com/photo-1565793298595-6a879b1d9492?auto=format&fit=crop&w=1000&q=85" },
+  { id: "01242", title: "Sobrado com varanda", type: "Casa", saleType: "Financiamento", location: "Goiânia · Parque Atheneu", price: 59990000, status: "disponivel", available: 1, total: null, bedrooms: 4, area: "210 m²", image: "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1000&q=85" },
+];
+
+const statusLabels = { disponivel: "Disponível", reservado: "Reservado", vendido: "Vendido" } as const;
+function contactLink(property: (typeof catalogProperties)[number]) { return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Olá, tenho interesse no imóvel ${property.id} — ${property.title}.`)}`; }
+
+export default function Catalog() {
+  const [query, setQuery] = useState("");
+  const [type, setType] = useState("Todos");
+  const [saleType, setSaleType] = useState("Todos");
+  const [status, setStatus] = useState("disponivel");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
+  const [sort, setSort] = useState("recentes");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  const filtered = useMemo(() => {
+    const min = minPrice ? Number(minPrice) * 100 : 0;
+    const max = maxPrice ? Number(maxPrice) * 100 : Number.POSITIVE_INFINITY;
+    const result = catalogProperties.filter((property) => {
+      const haystack = `${property.title} ${property.location} ${property.type}`.toLowerCase();
+      return (!query || haystack.includes(query.toLowerCase())) && (type === "Todos" || property.type === type) && (saleType === "Todos" || property.saleType === saleType) && (status === "todos" || property.status === status) && property.price >= min && property.price <= max;
+    });
+    return [...result].sort((a, b) => sort === "menor" ? a.price - b.price : sort === "maior" ? b.price - a.price : 0);
+  }, [maxPrice, minPrice, query, saleType, sort, status, type]);
+
+  return <div className="catalog-page">
+    <header className="catalog-header"><div className="container catalog-nav"><Link href="/" className="catalog-back"><ArrowLeft size={17} /> Voltar para início</Link><Link href="/" className="catalog-logo"><img src="/manus-storage/logo-wfc_8d426acc.jpg" alt="WFC Imóveis" /></Link><a className="catalog-contact" href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">WhatsApp <ArrowUpRight size={15} /></a></div></header>
+    <main className="catalog-main"><div className="container"><div className="catalog-intro"><div><p className="section-label">Catálogo WFC</p><h1>Encontre um lugar<br /><em>para chamar de seu.</em></h1><p>Filtre por tipo, condição de venda e faixa de valor. Se preferir, nossa equipe encontra as melhores opções para você.</p></div><div className="catalog-count"><strong>{filtered.length}</strong><span>oportunidades<br />encontradas</span></div></div>
+      <div className="catalog-toolbar"><div className="catalog-search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Busque por título, bairro ou tipo" /></div><button className="filter-trigger" onClick={() => setFiltersOpen((value) => !value)}><SlidersHorizontal size={17} /> Filtros <span>{[type !== "Todos", saleType !== "Todos", status !== "todos", !!minPrice, !!maxPrice].filter(Boolean).length || ""}</span></button><label className="sort-select"><span>Ordenar:</span><select value={sort} onChange={(event) => setSort(event.target.value)}><option value="recentes">Mais recentes</option><option value="menor">Menor preço</option><option value="maior">Maior preço</option></select><ChevronDown size={15} /></label></div>
+      <div className={filtersOpen ? "catalog-layout filters-visible" : "catalog-layout"}><aside className="catalog-filters"><div className="filter-head"><strong>Refine sua busca</strong><button onClick={() => { setType("Todos"); setSaleType("Todos"); setStatus("todos"); setMinPrice(""); setMaxPrice(""); }}><X size={13} /> Limpar</button></div><label className="filter-field"><span>Tipo de imóvel</span><select value={type} onChange={(event) => setType(event.target.value)}><option>Todos</option><option>Casa</option><option>Chácara</option><option>Loteamento</option><option>Comercial</option></select></label><label className="filter-field"><span>Tipo de venda</span><select value={saleType} onChange={(event) => setSaleType(event.target.value)}><option>Todos</option><option>Financiamento</option><option>Ágio</option><option>Pagamento Facilitado</option></select></label><div className="filter-field"><span>Faixa de preço</span><div className="price-fields"><input type="number" min="0" value={minPrice} onChange={(event) => setMinPrice(event.target.value)} placeholder="Mínimo" /><input type="number" min="0" value={maxPrice} onChange={(event) => setMaxPrice(event.target.value)} placeholder="Máximo" /></div></div><div className="filter-field"><span>Status do imóvel</span><label className="radio-row"><input type="radio" checked={status === "disponivel"} onChange={() => setStatus("disponivel")} /> Apenas disponíveis</label><label className="radio-row"><input type="radio" checked={status === "todos"} onChange={() => setStatus("todos")} /> Todos os status</label></div></aside><section className="catalog-results"><div className="results-caption"><span><Filter size={14} /> {filtered.length} resultados</span><span>Preços em reais, atualizados pela equipe WFC</span></div><div className="catalog-grid">{filtered.map((property) => <article className="catalog-card" key={property.id}><div className="catalog-card-image"><img src={property.image} alt={property.title} /><span className={`status-pill ${property.status}`}>{property.status === "disponivel" && <Check size={12} />}{statusLabels[property.status as keyof typeof statusLabels]}</span><small>Cód. {property.id}</small></div><div className="catalog-card-body"><span className="catalog-card-type">{property.type} · {property.saleType}</span><h2>{property.title}</h2><p><MapPin size={14} /> {property.location}</p><div className="catalog-card-meta"><span><BedDouble size={15} /> {property.bedrooms ? `${property.bedrooms} quartos` : "Uso flexível"}</span><span>{property.area}</span>{property.total && <span>{property.available} de {property.total} disponíveis</span>}</div><div className="catalog-card-footer"><strong>{formatBRLFromCents(property.price)}</strong><a href={contactLink(property)} target="_blank" rel="noreferrer">Tenho interesse <ArrowUpRight size={15} /></a></div></div></article>)}</div>{filtered.length === 0 && <div className="catalog-empty"><Filter size={25} /><h2>Nenhum imóvel encontrado</h2><p>Ajuste os filtros ou fale com a WFC para uma busca personalizada.</p><a className="button button-primary" href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">Falar com um corretor</a></div>}</section></div></div></main>
+  </div>;
+}
