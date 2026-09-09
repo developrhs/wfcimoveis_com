@@ -152,9 +152,10 @@ export default function Home() {
             <img src={logoSrc} alt="WFC Imóveis" />
           </a>
           <nav className={menuOpen ? "main-nav is-open" : "main-nav"}>
-            <a href="#imoveis" onClick={() => setMenuOpen(false)}>Encontrar imóvel</a>
+            <a href="/catalogo" onClick={() => setMenuOpen(false)}>Imóveis</a>
+            <a href="/clientes" onClick={() => setMenuOpen(false)}>Nossos clientes</a>
             <a href="#especialidades" onClick={() => setMenuOpen(false)}>Especialidades</a>
-            <a href="#sobre" onClick={() => setMenuOpen(false)}>Sobre a WFC</a>
+            <a href="/equipe" onClick={() => setMenuOpen(false)}>Nossa equipe</a>
             <a href="#contato" onClick={() => setMenuOpen(false)}>Contato</a>
           </nav>
           <a className="nav-cta" href={whatsappLink()} target="_blank" rel="noreferrer"><MessageCircle size={17} /> WhatsApp</a>

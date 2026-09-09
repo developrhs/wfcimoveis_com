@@ -6,13 +6,19 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Admin from "./pages/Admin";
 import Catalog from "./pages/Catalog";
+import Clients from "./pages/Clients";
 import Home from "./pages/Home";
+import PropertyDetail from "./pages/PropertyDetail";
+import Team from "./pages/Team";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/catalogo" component={Catalog} />
+      <Route path="/clientes" component={Clients} />
+      <Route path="/imovel/:id" component={PropertyDetail} />
+      <Route path="/equipe" component={Team} />
       <Route path="/admin" component={Admin} />
       <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
