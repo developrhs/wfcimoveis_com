@@ -1,0 +1,11 @@
+Options -Indexes
+RewriteEngine On
+RewriteRule ^api/config/ - [F,L]
+RewriteRule ^api/v1/auth/login/?$ api/v1/auth-login.php [L,QSA]
+RewriteRule ^api/v1/auth/me/?$ api/v1/auth-me.php [L,QSA]
+RewriteRule ^api/v1/auth/logout/?$ api/v1/auth-logout.php [L,QSA]
+RewriteRule ^api/v1/dashboard/summary/?$ api/v1/dashboard-summary.php [L,QSA]
+RewriteRule ^api/v1/health/?$ api/v1/health.php [L,QSA]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]

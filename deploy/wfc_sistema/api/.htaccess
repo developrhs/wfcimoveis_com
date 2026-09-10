@@ -1,0 +1,4 @@
+Options -Indexes
+<FilesMatch "(database|bootstrap|auth|summary)\.php$">
+  Require all denied
+</FilesMatch>
