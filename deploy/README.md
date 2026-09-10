@@ -4,7 +4,17 @@ Este pacote deve ser extraído diretamente em `/home3/cwcimo17/public_html/`, pr
 
 ## Configuração do banco
 
-A API lê `WFC_DB_HOST`, `WFC_DB_NAME`, `WFC_DB_USER` e `WFC_DB_PASS` do ambiente PHP. No HostGator, configure as quatro variáveis no mecanismo de ambiente disponível para PHP/Apache. O banco esperado é `cwcimo17_wfc_imoveis`; nunca grave a senha no JavaScript, no repositório ou neste documento.
+A API lê `WFC_DB_HOST`, `WFC_DB_NAME`, `WFC_DB_USER` e `WFC_DB_PASS` do ambiente PHP. Como alternativa, crie diretamente no servidor `/home3/cwcimo17/public_html/wfc_sistema/api/config/local.php` com este conteúdo, substituindo apenas os valores:
+
+```php
+<?php
+define('WFC_DB_HOST', 'localhost');
+define('WFC_DB_NAME', 'cwcimo17_wfc_imoveis');
+define('WFC_DB_USER', 'cwcimo17_SEU_USUARIO');
+define('WFC_DB_PASS', 'SUA_SENHA');
+```
+
+Esse arquivo é bloqueado pelo `.htaccess` e não deve ser enviado ao GitHub. O banco esperado é `cwcimo17_wfc_imoveis`; nunca grave a senha no JavaScript, no repositório ou neste documento.
 
 ## Rotas iniciais
 
@@ -19,7 +29,7 @@ A tela inicial é renderizada por `index.php`, usa sessão PHP com cookie HttpOn
 ## Publicação pelo cPanel
 
 1. Faça upload de `wfc-sistema-initial.zip` em `/home3/cwcimo17/public_html/`.
-2. Extraia o ZIP nessa pasta, sem criar uma pasta intermediária adicional.
+2. Extraia o ZIP nessa pasta, sem criar uma pasta intermediária adicional. O conteúdo deve ficar em `public_html/wfc_sistema/`, não em `public_html/wfc_sistema/wfc_sistema/`.
 3. Confirme que o arquivo final está em `/home3/cwcimo17/public_html/wfc_sistema/index.php`.
 4. Configure as variáveis do banco no ambiente PHP.
 5. Abra `/sistema/api/v1/health` e confirme a resposta JSON `ok: true`.
