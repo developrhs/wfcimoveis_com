@@ -1,4 +1,5 @@
 Options -Indexes
+DirectoryIndex index.php
 RewriteEngine On
 RewriteRule ^api/config/ - [F,L]
 RewriteRule ^api/v1/auth/login/?$ api/v1/auth-login.php [L,QSA]
