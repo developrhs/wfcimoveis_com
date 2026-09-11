@@ -495,3 +495,12 @@ As mensagens de commit devem descrever uma única mudança principal, preferenci
 
 [1]: https://wfcimoveis-gmyryiuy.manus.space "WFC Imóveis — aplicação publicada"
 [2]: https://github.com/developrhs/wfcimoveis_com "Repositório GitHub da WFC Imóveis"
+
+
+## 11. Separação dos repositórios e do HostGator
+
+Este repositório, **developrhs/wfcimoveis_com**, é a fonte do conteúdo web que deve ser preparado para o `public_html` do HostGator. Ele pode conter o frontend publicado, o pacote PHP de `wfc_sistema`, regras `.htaccess`, documentação de deploy e os arquivos necessários ao site.
+
+O aplicativo desktop Java não deve ser colocado neste repositório. O desenvolvimento desktop está isolado em **developrhs/wfcimoveis_wfcsystem_v1**, que contém o código Java, o JAR executável, a configuração local e o inicializador Windows.
+
+A sincronização ou substituição do `public_html` deve ser feita somente depois de uma cópia verificável do conteúdo atual, validação de build e confirmação explícita do proprietário imediatamente antes de qualquer operação destrutiva. Credenciais de cPanel, FTP, banco, tokens e chaves privadas nunca devem ser commitadas em nenhum dos dois repositórios.
