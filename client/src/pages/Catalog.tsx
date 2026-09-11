@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowUpRight, BedDouble, Check, ChevronDown, Filter, MapPin, Search, SlidersHorizontal, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { formatBRLFromCents } from "@/lib/currency";
 
@@ -15,8 +15,10 @@ const catalogProperties = [
 
 const statusLabels = { disponivel: "Disponível", reservado: "Reservado", vendido: "Vendido" } as const;
 function contactLink(property: (typeof catalogProperties)[number]) { return `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Olá, tenho interesse no imóvel ${property.id} — ${property.title}.`)}`; }
-
+const PUBLIC_PROPERTIES_API = "https://wfcimoveis.com/sistema/api/v1/public/properties";
+function normalizeProperty(raw: any): (typeof catalogProperties)[number] { const images = Array.isArray(raw.images) ? raw.images : []; return { id: String(raw.id ?? raw.codigo ?? ""), title: String(raw.title ?? raw.titulo ?? "Imóvel WFC"), type: String(raw.type ?? raw.tipo ?? "Imóvel"), saleType: String(raw.saleType ?? raw.tipoVenda ?? "Consulte"), location: String(raw.location ?? raw.localizacao ?? "Goiás"), price: Number(raw.price ?? raw.price_cents ?? raw.valor_centavos ?? 0), status: raw.status === "reservado" || raw.status === "vendido" ? raw.status : "disponivel", available: Number(raw.available ?? raw.disponivel ?? 1), total: raw.total == null ? null : Number(raw.total), bedrooms: Number(raw.bedrooms ?? raw.quartos ?? 0), area: String(raw.area ?? raw.metragem ?? ""), image: String(raw.image ?? images[0] ?? raw.foto ?? "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1000&q=85") }; }
 export default function Catalog() {
+  const [properties, setProperties] = useState(catalogProperties);
   const [query, setQuery] = useState("");
   const [type, setType] = useState("Todos");
   const [saleType, setSaleType] = useState("Todos");
@@ -26,15 +28,17 @@ export default function Catalog() {
   const [sort, setSort] = useState("recentes");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  useEffect(() => { fetch(PUBLIC_PROPERTIES_API).then((response) => { if (!response.ok) throw new Error("API indisponível"); return response.json(); }).then((body) => { if (Array.isArray(body.items)) setProperties(body.items.map(normalizeProperty)); }).catch(() => { /* fallback visual enquanto a API estiver indisponível */ }); }, []);
+
   const filtered = useMemo(() => {
     const min = minPrice ? Number(minPrice) * 100 : 0;
     const max = maxPrice ? Number(maxPrice) * 100 : Number.POSITIVE_INFINITY;
-    const result = catalogProperties.filter((property) => {
+    const result = properties.filter((property) => {
       const haystack = `${property.title} ${property.location} ${property.type}`.toLowerCase();
       return (!query || haystack.includes(query.toLowerCase())) && (type === "Todos" || property.type === type) && (saleType === "Todos" || property.saleType === saleType) && (status === "todos" || property.status === status) && property.price >= min && property.price <= max;
     });
     return [...result].sort((a, b) => sort === "menor" ? a.price - b.price : sort === "maior" ? b.price - a.price : 0);
-  }, [maxPrice, minPrice, query, saleType, sort, status, type]);
+  }, [maxPrice, minPrice, properties, query, saleType, sort, status, type]);
 
   return <div className="catalog-page">
     <header className="catalog-header"><div className="container catalog-nav"><Link href="/" className="catalog-back"><ArrowLeft size={17} /> Voltar para início</Link><Link href="/" className="catalog-logo"><img src="/manus-storage/logo-wfc_8d426acc.jpg" alt="WFC Imóveis" /></Link><div className="catalog-header-links"><Link href="/clientes">Nossos clientes</Link><a className="catalog-contact" href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noreferrer">WhatsApp <ArrowUpRight size={15} /></a></div></div></header>
