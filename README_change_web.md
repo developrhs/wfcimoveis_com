@@ -109,3 +109,7 @@ A publicação só deve ocorrer quando: a build passar; os testes passarem; os d
 O próximo passo é comparar e selecionar os dados do legado que serão migrados para a nova aplicação, validar a build e preparar um staging. A limpeza do `public_html` e a publicação no HostGator ficam bloqueadas até que o checklist esteja concluído e o proprietário confirme explicitamente essa operação destrutiva.
 
 > **Regra de segurança:** backup não é sincronização. O arquivo de 09/09/2026 é uma fotografia da hospedagem naquele momento; qualquer alteração posterior precisa de uma nova cópia antes da publicação.
+
+## 8. Página de manutenção (11/09/2026)
+
+A página inicial original foi preservada em `index_old.html`. O `index.html` da raiz é agora exclusivamente a página pública de manutenção, com previsão até 30/09/2026 e atendimento via WhatsApp. A cópia `maintenance.html` mantém o mesmo conteúdo para referência e rollback controlado.
