@@ -9,15 +9,17 @@ import Catalog from "./pages/Catalog";
 import Clients from "./pages/Clients";
 import Home from "./pages/Home";
 import PropertyDetail from "./pages/PropertyDetail";
+import SystemLanding from "./pages/SystemLanding";
 import Team from "./pages/Team";
 
 function Router() {
-  const base = window.location.pathname === "/sistema" || window.location.pathname.startsWith("/sistema/") ? "/sistema" : "";
+  const isSystem = window.location.pathname === "/sistema" || window.location.pathname.startsWith("/sistema/");
+  const base = isSystem ? "/sistema" : "";
 
   return (
     <WouterRouter base={base}>
       <Switch>
-        <Route path="/" component={Home} />
+        <Route path="/" component={isSystem ? SystemLanding : Home} />
         <Route path="/catalogo" component={Catalog} />
         <Route path="/clientes" component={Clients} />
         <Route path="/imovel/:id" component={PropertyDetail} />
