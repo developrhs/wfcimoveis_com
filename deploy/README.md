@@ -41,3 +41,19 @@ As rotas de sincronização criam a tabela `wfc_sync_records` na primeira utiliz
 6. Abra `/sistema/` e teste login, sessão, logout e dashboard.
 
 Se o ambiente HostGator não disponibilizar variáveis para PHP, crie uma configuração protegida fora do controle de versão e adapte `api/config/database.php`; não publique credenciais em arquivos JavaScript.
+
+## Arquitetura permanente do produto
+
+A instalação possui três partes independentes e permanentes:
+
+| Componente | Endereço ou execução | Responsabilidade |
+|---|---|---|
+| Site público | `https://wfcimoveis.com/` | Apresentar aos clientes os imóveis, propostas e conteúdo público. |
+| Sistema web | `https://wfcimoveis.com/sistema/` | Login e telas administrativas de imóveis, clientes, prova social e usuários. |
+| WfcSystem | Aplicação Java local | Permitir cadastros offline em SQLite e sincronizar registros pela API HTTPS e imagens pelo FTP quando houver conexão. |
+
+O deploy do sistema web deve alterar somente `/home3/cwcimo17/public_html/wfc_sistema/`, que é acessado externamente como `/sistema/`. **Nunca substituir, limpar ou extrair arquivos diretamente na raiz de `public_html`**, pois ela pertence ao site público já online.
+
+O sistema web não é uma página de manutenção nem um staging temporário: ele é o painel permanente da operação. O site público e o painel compartilham a API e o banco, mas mantêm responsabilidades e arquivos separados. A aplicação Java local também permanece separada do site e nunca recebe credenciais MySQL; ela usa a API HTTPS para dados e o FTP somente para a fila de imagens.
+
+Para tornar a instalação permanente no HostGator, publique o conteúdo de `deploy/wfc_sistema/` em `/home3/cwcimo17/public_html/wfc_sistema/`, configure o `local.php` protegido com os dados do banco e valide `/sistema/api/v1/health`, login e as telas administrativas. A atualização deve ser feita por cópia de segurança da pasta `wfc_sistema` e substituição somente dentro dela.
