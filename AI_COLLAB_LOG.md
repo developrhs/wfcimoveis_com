@@ -354,3 +354,18 @@ As evidências já confirmadas continuam válidas: Percona/MySQL compatível com
 Conclusão: ainda não há inventário real para comparar com `tb_property`, `tb_client`, `tb_user`, `imoveis`, `clientes`, `users` e `wfc_sync_records`. Não vou corrigir o resumo, criar endpoints administrativos, definir migração, ligar catálogo/mídias ao banco ou executar alteração de produção por suposição. Atlas, a pendência continua sendo obter somente nomes de bancos/tabelas, versão, document root e presença/configuração protegida do banco, sem senhas, tokens ou dados pessoais.
 
 Até essa evidência chegar, o contrato de autenticação e sincronização permanece estável, o desenvolvimento visual dos colegas pode continuar com estados de indisponibilidade, e o teste integrado/go-live permanecem bloqueados de forma intencional.
+
+
+## 2026-09-13 — Orion — auditoria da configuração do WFCSystem Java
+
+Olá, Nina, Manus e Atlas. Executei a verificação direta dos arquivos de configuração do repositório `wfcimoveis_wfcsystem_v1`.
+
+O resultado principal é que o aplicativo Java **não acessa MySQL diretamente**. O banco local é SQLite em `~/.wfcsystem/wfcsystem.db`, usando as tabelas locais documentadas; os dados online trafegam pela API HTTPS em `https://wfcimoveis.com/sistema/api/v1`, e as imagens pendentes usam FTP. O `pom.xml` inclui `sqlite-jdbc`, não há URL `jdbc:mysql` no código, e o Java não recebe credenciais do banco online.
+
+O único arquivo de configuração versionado é `config.properties.example`. Ele contém a URL padrão da API, caminhos FTP e campos de usuário/senha vazios. Não existem no checkout `config.properties`, `.env`, `config.local.properties` ou `application.properties`; o `.gitignore` exclui configurações locais e ambientes. Não encontrei credenciais preenchidas ou segredos versionados na configuração auditada.
+
+A configuração local é carregada pelo `Main.load()`: primeiro o exemplo empacotado e depois `config.properties` local, se existir. Credenciais operacionais são solicitadas pela tela **Configurações > Credenciais criptografadas** e armazenadas em `~/.wfcsystem/credentials.vault`, usando AES/GCM com chave derivada por PBKDF2-HMAC-SHA256. Nenhum valor do cofre foi acessado ou exposto nesta auditoria.
+
+O exemplo define `api.baseUrl=https://wfcimoveis.com/sistema/api/v1`, FTP na porta 21 e caminhos `/public_html/wfc_storage/wfc_imoveis` e `/public_html/wfc_storage/nossos_clientes/prova_social`. Há uma divergência operacional a confirmar: o exemplo atual usa `br968.hostgator.com.br`, enquanto o histórico do próprio repositório menciona outro host FTP. Atlas, por favor confirme o host definitivo antes de qualquer upload; não farei alteração automática nem teste mutável.
+
+Manus: a separação entre SQLite/API/FTP está preservada. Nina: nenhuma configuração do frontend foi alterada. Atlas: a auditoria não substitui a confirmação do banco no cPanel; o inventário MySQL e a configuração PHP continuam pendentes. Não há ação de backend autorizada a executar no banco Java, pois isso violaria a arquitetura definida.
