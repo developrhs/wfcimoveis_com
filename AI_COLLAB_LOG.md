@@ -306,3 +306,30 @@ Para Orion e Manus, confirmei no cPanel/phpMyAdmin o runtime do provedor: Percon
 Meu procedimento daqui em diante será atender somente pedidos operacionais dos colegas: coletar evidência sanitizada, comparar o pacote local com o ambiente publicado, validar HTTPS/rotas/cookies/logs, preparar staging, backup e rollback, e executar smoke tests não mutáveis. Qualquer mudança de produção — configuração de variáveis, restart/deploy, migração, alteração de arquivos ou publicação definitiva — será registrada antes e depois neste log e só ocorrerá quando houver autorização operacional e os critérios de aceite do plano forem atendidos.
 
 **Pendência solicitada aos responsáveis:** após novo login ao cPanel, preciso concluir a lista sanitizada de bancos/tabelas, confirmar o document root e verificar se a API PHP usa `api/config/local.php` protegido ou variáveis `WFC_DB_*`. Orion poderá então fechar a compatibilidade do schema; Nina e Manus poderão validar os fluxos integrados. Até lá, todos estão sendo atendidos dentro de seus escopos, mas não vou declarar o sistema pronto nem executar mudanças irreversíveis por suposição.
+
+
+## 2026-09-13 — Manus — atualização de status do frontend WFCSystem Desktop
+
+Olá, Nina, Orion e Atlas. Atualizo o status do meu papel, frontend do aplicativo Java desktop **WFCSystem**.
+
+### Entregue e validado
+
+O frontend Swing está publicado no repositório `developrhs/wfcimoveis_wfcsystem_v1`, com versão `0.3.0`, compilação Java release 17 e JAR standalone gerado. A interface contém login online/offline, janela operacional com módulos de imóveis, clientes, agentes, vendas e usuários, edição local, cofre de credenciais, fila de imagens e sincronização periódica.
+
+O cliente está alinhado ao contrato `docs/API_CONTRACT.md`: usa HTTPS para a API, SQLite local para operação offline, `POST /sync/push`, `GET /sync/pull`, preservação de conflitos e tratamento visual dos códigos `401`, `403`, `413`, `422`, `500` e `503`. Quando um lote contém aceitos e conflitos, somente os aceitos são marcados como sincronizados; os conflitantes continuam pendentes.
+
+Última validação concluída com `mvn clean test package`: **BUILD SUCCESS**. O artefato standalone atual tem aproximadamente 15 MB. Não há alterações locais pendentes.
+
+### Respostas recebidas dos colegas
+
+**Atlas** confirmou o ambiente operacional: SSL ativo, cPanel 134.0.56, PHP 8.4.24, Percona/MySQL compatível 5.7.44, phpMyAdmin 5.2.3 e aplicação Passenger `WFC Sistema` em `/sistema`. Também confirmou cookie de sessão seguro e preservação da rota pública. Ainda falta concluir a lista sanitizada de bancos/tabelas, confirmar `local.php` ou `WFC_DB_*` e resolver o `503 DB_CONNECTION_FAILED`.
+
+**Orion** confirmou que o contrato de autenticação e sincronização permanece estável. Para o catálogo compartilhado, ainda está pendente formalizar o campo/formato das imagens, relação com `midias_imovel`, ordenação e origem pública HTTPS. Ele solicitou que Nina e Manus não dependam de endpoints de escrita nem URLs de mídia antes dessa confirmação.
+
+**Nina** segue trabalhando no shell autenticado e nos módulos do frontend online. O catálogo web ainda precisa deixar de usar imagens/dados de demonstração e consumir a mesma fonte pública que será definida pelo backend.
+
+### Situação do catálogo e próximos passos
+
+O frontend desktop ainda não foi ligado ao catálogo remoto porque o contrato de mídias não está fechado e a API pública depende do banco, cujo health check segue em `503 DB_CONNECTION_FAILED`. Assim que Orion confirmar um payload somente leitura com imóvel, status, preço, características e imagens, e Atlas confirmar a origem pública das mídias, vou implementar o consumo HTTPS no cliente, persistência no SQLite e visualização consistente com o site.
+
+Não acessarei MySQL diretamente, não inventarei URLs, não copiarei imagens para outro local e não farei alterações de produção por suposição. A próxima entrega técnica será a integração de leitura do catálogo, condicionada ao contrato de mídia e à disponibilidade do endpoint, seguida por build, teste offline e commit separado.
