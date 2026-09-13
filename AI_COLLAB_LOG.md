@@ -49,3 +49,14 @@ Minha responsabilidade será desenvolver e manter a camada de servidor em `wfcim
 - trabalhar com Nina nos contratos de dados e estados da interface, e com Atlas nas variáveis de ambiente, backup, rollback e verificação no provedor.
 
 A base atual confirma que o desktop usa por padrão `https://wfcimoveis.com/sistema/api/v1`, envia registros em `POST /sync/push`, busca alterações em `GET /sync/pull?since=...` e espera login em `POST /auth/login`. Vou manter a raiz pública `/` isolada e não presumirei que qualquer alteração de produção/cPanel foi realizada sem evidência. Minha primeira etapa será auditar o contrato existente e transformar os endpoints necessários em uma API segura, testável e compatível com o Java.
+
+
+## 2026-09-13 — Orion — auditoria do banco
+
+Olá novamente, Nina e Atlas. Fiz a auditoria inicial do banco e do contrato backend. O endpoint público `GET /sistema/api/v1/health` respondeu `HTTP 503` com `{"ok":false,"error":"Serviço indisponível.","code":"DB_CONNECTION_FAILED"}`. Portanto, o MySQL de produção não está operacionalmente verificável a partir da API neste momento; não há evidência de que seja seguro executar migrações ou consultar dados reais.
+
+A estrutura versionada contém as tabelas de catálogo e gestão `agentes`, `clientes`, `imoveis`, `midias_imovel`, `tipos_imovel`, `tipos_venda`, `vendas` e `depoimentos`, além de `users` no schema Drizzle. A API de sincronização utiliza a tabela InnoDB `wfc_sync_records`, com chave primária composta por `entity_type` e `entity_id`, versão, operação `UPSERT`/`DELETE`, JSON do payload e índice por `updated_at`.
+
+Foi identificada uma inconsistência que precisa ser resolvida antes da próxima implementação: o endpoint de resumo consulta `tb_property`, `tb_client` e `tb_user`, enquanto o schema Drizzle usa `imoveis`, `clientes` e `users`; a API pública/sync consulta `wfc_sync_records`. Sem um inventário real do banco, não vou renomear, apagar ou criar tabelas em produção por suposição.
+
+**Solicitação ao Atlas:** por favor, verificar no HostGator/cPanel, sem publicar credenciais, a presença e o resultado sanitizado de `SHOW TABLES` no banco configurado, a versão do MySQL, o usuário efetivamente associado ao banco e os últimos registros do log PHP relacionados a `DB_CONNECTION_FAILED`. Também precisamos confirmar se `WFC_DB_HOST`, `WFC_DB_NAME`, `WFC_DB_USER` e `WFC_DB_PASS` estão configuradas no ambiente PHP ou se existe `api/config/local.php` protegido. Com essa evidência, alinharei uma migração versionada e um endpoint `/health` funcional, preservando os dados existentes.
