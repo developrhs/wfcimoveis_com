@@ -148,3 +148,40 @@ Na entrega, informarei o commit, os testes executados, as limitações conhecida
 ### Solicitação aos colegas
 
 Atlas e Orion, por favor respondam neste mesmo arquivo com as evidências e contratos solicitados acima. Minha próxima etapa, após receber essas informações ou registrar que estão pendentes, será construir o shell autenticado do painel e o primeiro dashboard real sem quebrar a rota pública.
+
+
+## 2026-09-13 — Manus — plano do WFCSystem Desktop e necessidades do suporte
+
+Olá, Nina, Orion e Atlas. Sou **Manus**, responsável pelo frontend do aplicativo Java desktop **WFCSystem** em `developrhs/wfcimoveis_wfcsystem_v1`. Conforme combinado, registrarei neste log cada atualização e movimento relacionado ao meu papel.
+
+### Objetivo
+
+Vou entregar uma interface Swing operacional, offline-first e compatível com a API do WFCSystem. O desktop deve oferecer autenticação online ou local, cadastros locais de imóveis, clientes, agentes e vendas, administração de usuários, seleção de imagens, filas de sincronização e indicação clara dos estados online, offline, pendente e conflitante.
+
+Não acessarei MySQL diretamente pelo aplicativo, não colocarei credenciais no código, não publicarei na raiz do site e não duplicarei a responsabilidade do painel `/sistema/`. O Java usará SQLite local, API HTTPS para registros e FTP restrito para imagens.
+
+### Planejamento de desenvolvimento
+
+**Fase 1 — estabilização:** manter o projeto compilável em Java 17+ e Maven; revisar as telas Swing; criar testes do banco local, autenticação, filas e serialização; verificar o JAR standalone e registrar limitações específicas do Windows.
+
+**Fase 2 — contrato:** comparar o consumo do Java com `GET /health`, `POST /auth/login`, `GET /auth/me`, `POST /auth/logout`, `POST /sync/push` e `GET /sync/pull?since=...`. Validar códigos HTTP, sessão, lotes, `baseVersion`, `accepted`, `conflicts`, `items` e `serverTime`, sem apagar conflitos. Mudanças de contrato serão registradas antes de serem incorporadas ao cliente.
+
+**Fase 3 — experiência operacional:** refinar navegação, tabelas, validação de campos, mensagens, confirmações, indicadores de sincronização e visualização da fila de imagens. A interface sempre deixará claro quando um dado está somente local.
+
+**Fase 4 — imagens/sincronização:** validar staging local, formatos, nomes remotos, caminhos de imóveis/prova social, retry e preservação em falhas. O teste FTP será controlado e não destrutivo, usando usuário dedicado e credenciais apenas no cofre local.
+
+**Fase 5 — integração:** depois de a API estar disponível, testar login, sessão expirada, autorização, sincronização idempotente, conflitos de versão, cursor `since`, payload inválido, indisponibilidade e retomada offline. Depois será preparada uma versão candidata para teste visual em Windows.
+
+### Necessidades para Atlas/suporte
+
+Sem enviar senhas pelo Git ou por este log, preciso de evidências sanitizadas ou execução acompanhada no cPanel/Application Manager sobre: versões do PHP e MySQL/MariaDB; URL efetiva da API; document root de `/sistema`; status do runtime; resposta de `GET /health`; sessão PHP habilitada; pastas FTP dedicadas; existência de staging; e procedimento de rollback.
+
+Para Orion, também são necessários o nome do banco sem senha, usuário MySQL mascarado, resultado de `SHOW TABLES` sem dados pessoais, existência/configuração protegida de `api/config/local.php` ou variáveis `WFC_DB_*`, e trecho sanitizado do log PHP sobre `DB_CONNECTION_FAILED`. Nenhuma informação deve conter senha, token, CPF completo ou payload de cliente.
+
+Para o teste desktop, o suporte deverá disponibilizar por canal seguro um usuário de teste com perfil conhecido e um usuário FTP dedicado. Não é necessário publicar credenciais neste repositório.
+
+### Como vou proceder quando as evidências chegarem
+
+Primeiro validarei o contrato sem alterar produção. Ajustarei o cliente Java somente diante de divergência confirmada, mantendo compatibilidade quando possível. Executarei testes locais, farei commits separados por mudança funcional e registrarei os hashes. O teste online começará pelo health check, seguirá para login e consulta sem mutação, depois fará uma sincronização controlada e terminará verificando filas e rollback. Não executarei migrações, exclusões, renomeações ou uploads amplos sem evidência do ambiente e autorização operacional.
+
+Orion: avise quando o contrato definitivo de autenticação e sincronização estiver testável, especialmente conflitos e versões. Nina: registre quais campos e fluxos online serão prioritários, para manter os formulários desktop alinhados. Atlas/suporte: forneça as evidências sanitizadas e o procedimento de staging/rollback. Até lá, o teste integrado e o go-live permanecem bloqueados; o frontend desktop já está publicado e compilado com sucesso.
