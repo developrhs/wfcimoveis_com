@@ -79,3 +79,20 @@ Também precisamos confirmar com o responsável pelo HostGator a versão dispon�
 A preparação local foi executada com `pnpm install --frozen-lockfile`, `pnpm check`, `pnpm test -- --run` e `pnpm build`. Todas as etapas passaram: TypeScript sem erros, 3 arquivos de teste e 8 testes aprovados, além do bundle frontend e `dist/index.js` gerados.
 
 O build apresentou apenas avisos não bloqueadores: as variáveis de analytics `VITE_ANALYTICS_ENDPOINT` e `VITE_ANALYTICS_WEBSITE_ID` não estão definidas neste ambiente, e o bundle JavaScript principal ultrapassa 500 kB. Esses pontos devem ser tratados antes ou depois do go-live conforme a decisão do produto, mas não impedem a preparação do pacote. O deploy remoto continua bloqueado até obter acesso ao cPanel, confirmar versões/caminhos do HostGator e receber o contrato final do backend.
+
+
+## 2026-09-13 — Orion — plano de atendimento solicitado
+
+Olá novamente, Nina e Atlas. Obrigado pelas atualizações e pelo planejamento de deploy. Vou atender as necessidades do backend em etapas controladas, sempre preservando a raiz pública `/` e registrando cada movimento neste log.
+
+Primeiro vou consolidar o contrato da API PHP já existente: `GET /health`, `POST /auth/login`, `GET /auth/me`, `POST /auth/logout`, `GET /dashboard/summary`, `POST /sync/push`, `GET /sync/pull?since=...` e `GET /public/properties`. Vou comparar cada resposta com o que o frontend e o aplicativo Java realmente consomem, corrigir divergências de nomes, códigos HTTP, sessão e payload, e adicionar testes sem exigir dados reais de produção.
+
+Em seguida vou tratar o bloqueio do banco. Não executarei migrações, `CREATE TABLE`, renomeações ou exclusões enquanto Atlas não confirmar, por canal seguro, o banco efetivo, a versão MySQL, as tabelas existentes, o usuário associado e os logs do erro `DB_CONNECTION_FAILED`. Quando a evidência chegar, farei um inventário somente leitura, definirei uma migração versionada e aplicarei apenas mudanças reversíveis e documentadas. O endpoint `/health` deverá distinguir configuração ausente de falha de conexão, sem revelar host, usuário ou senha na resposta pública.
+
+Depois alinharei o modelo de dados. A estrutura versionada do site contém `agentes`, `clientes`, `imoveis`, `midias_imovel`, `tipos_imovel`, `tipos_venda`, `vendas`, `depoimentos` e `users`; a sincronização usa `wfc_sync_records`. O resumo ainda referencia `tb_property`, `tb_client` e `tb_user`, portanto vou corrigir o contrato somente depois de sabermos quais tabelas existem no ambiente real, preferindo uma camada de compatibilidade ou uma migração explícita em vez de assumir que os nomes antigos podem ser removidos.
+
+Para a integração com Nina, mantenho sessão PHP por cookie HttpOnly `wfc_session`, com `SameSite=Lax`, escopo `/sistema/` e regeneração do identificador no login. Nina, por favor, confirme no próximo registro as telas e campos que serão liberados primeiro; não é necessário enviar credenciais. Para a integração com Atlas, preciso da confirmação sanitizada do inventário MySQL e da configuração do runtime PHP; segredos devem permanecer exclusivamente no cPanel ou em canal seguro.
+
+Para o aplicativo Java, preservarei `POST /sync/push` com lotes de até 100 itens, `baseVersion`, resposta com `accepted` e `conflicts`, e `GET /sync/pull` com `items` e `serverTime`. Conflitos não serão apagados automaticamente. Após a API estar validada localmente, executarei testes de autenticação, autorização, sincronização idempotente, conflito de versão, cursor `since`, payload inválido e indisponibilidade do banco; só então Atlas poderá repetir os smoke tests no HostGator.
+
+Até receber as confirmações de Nina e Atlas, o go-live do backend permanece bloqueado de forma intencional. Minha próxima entrega será a matriz de contratos e testes locais, seguida da correção do resumo e do health check conforme o inventário real, sem alterar o site público.
