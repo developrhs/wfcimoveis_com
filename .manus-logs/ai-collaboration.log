@@ -1,0 +1,34 @@
+# Registro de colaboração entre IAs — WFC Imóveis
+
+## 2026-09-13 16:56 America/Sao_Paulo — Manus / Frontend WFCSystem Desktop
+
+Sou **Manus**, responsável pelo desenvolvimento do frontend do aplicativo Java desktop **WFCSystem**, no repositório `developrhs/wfcimoveis_wfcsystem_v1`.
+
+Meu escopo nesta etapa é mapear e implementar a camada de interface Swing: tela de login online/offline, janela principal, navegação dos módulos, tabelas de imóveis/clientes/agentes/vendas/usuários, ações de sincronização e gestão de imagens, preservando os contratos do SQLite, API HTTPS, cofre de credenciais e fila offline existentes.
+
+Vou trabalhar com foco em uma interface operacional, segura e testável. Não vou substituir a raiz pública do site, alterar credenciais versionadas, acessar o MySQL diretamente pelo desktop, nem duplicar a responsabilidade do painel web `/sistema/`. Antes de mudanças estruturais, verificarei os contratos existentes e registrarei decisões e validações neste log para as demais IAs.
+
+Estado inicial observado: o código Java versionado contém `Main.java`, `AppDatabase.java` e `CredentialVault.java`, enquanto `Main.java` referencia `ManagementPanel` e `ImageStaging`; essas classes precisam ser localizadas, recuperadas ou implementadas de forma compatível antes do build final.
+
+## 2026-09-13 16:58 America/Sao_Paulo — Entrega inicial do frontend
+
+Implementado no repositório `developrhs/wfcimoveis_wfcsystem_v1`:
+
+- `ManagementPanel.java`: frontend Swing com abas de Imóveis, Clientes, Agentes, Vendas e Usuários;
+- cadastro, edição, exclusão local e atualização das tabelas via `AppDatabase`;
+- edição de perfil/status dos usuários locais;
+- `ImageStaging.java`: seleção de imagens, cópia para fila temporária, validação de extensão e upload FTP passivo/binário;
+- remoção do arquivo temporário somente após confirmação do FTP;
+- nomes remotos sanitizados e caminhos separados para imóveis e prova social.
+
+Validação: `mvn clean test package` concluído com **BUILD SUCCESS** usando Java 21/Maven 3.8.7. O artefato standalone foi gerado em `target/wfcsystem-v1-0.3.0-standalone.jar`.
+
+Pendências conscientemente preservadas: teste visual em ambiente Windows, teste FTP não destrutivo com credenciais reais e integração online após o endpoint PHP/MySQL sair do HTTP 503. Nenhuma credencial foi adicionada ao código ou ao log.
+
+## 2026-09-13 17:05 America/Sao_Paulo — Publicação do frontend WFCSystem Desktop
+
+Olá, colegas. O frontend Swing do WFCSystem Desktop foi implementado e validado com `mvn clean test package` (BUILD SUCCESS). Estou iniciando agora a publicação das alterações no repositório `developrhs/wfcimoveis_wfcsystem_v1`.
+
+Também estou registrando este aviso no repositório `wfcimoveis_com`, conforme combinado, para manter a colaboração entre as IAs. O pacote inclui `ManagementPanel.java`, `ImageStaging.java` e a atualização da versão de exemplo para `0.3.0`.
+
+Após o push, permanecem como próximos pontos de integração: teste visual no Windows, teste FTP não destrutivo com credenciais locais e validação da API PHP/MySQL, que ainda precisa sair do HTTP 503 no endpoint de health.
