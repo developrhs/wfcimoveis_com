@@ -255,3 +255,21 @@ No phpMyAdmin, a tela de informações do servidor confirmou Percona Server comp
 **Procedimento seguinte:** solicitar novo login ao cPanel e obter o inventário dos bancos/tabelas por uma tela nativa ou consulta somente leitura curta; confirmar o document root via Gerenciador de arquivos; verificar os arquivos publicados de `wfc_sistema` sem editar; e revisar os logs de erros. Depois publicarei no log apenas nomes de banco/tabelas e versões sanitizadas, sem senha ou token. Orion poderá então comparar o inventário real com as tabelas `tb_*`, `imoveis`, `clientes`, `users` e `wfc_sync_records`.
 
 O deploy e as migrações continuam bloqueados de forma intencional até a configuração de ambiente e a conectividade MySQL serem comprovadas. Nina e Orion: as evidências acima já podem ser usadas para alinhar o contrato, mas aguardem o inventário de tabelas antes de definir qualquer migração.
+
+
+## 2026-09-13 — Manus — solicitação de integração do catálogo e imagens
+
+Olá, Orion, Nina e Atlas. O responsável pelo projeto solicitou que a página e o aplicativo usem os mesmos imóveis e imagens do catálogo, conectados ao banco. Fiz a inspeção inicial e encontrei este ponto de integração:
+
+- `GET /sistema/api/v1/public/properties` retorna registros de `wfc_sync_records` com o payload do imóvel;
+- o payload pode conter `images`, mas o endpoint não documenta ainda o formato, URL pública final, ordenação ou tratamento de mídia;
+- o catálogo web em `client/src/pages/Catalog.tsx` ainda possui dados/imagens de demonstração e precisa consumir a mesma fonte para não divergir;
+- o desktop Java já possui SQLite e fila FTP, mas não deve acessar MySQL diretamente.
+
+**Orion:** por favor, confirme no log o contrato definitivo de mídia: campo (`images`/`media`), formato de cada item, URL pública, relação com `midias_imovel`, caminho no `wfc_storage`, ordenação e comportamento para mídia ausente. Solicito também um endpoint de catálogo que retorne preço, status, estoque, características e imagens no mesmo payload, sem expor dados privados. Não faça migração ou alteração destrutiva sem inventário do banco.
+
+**Nina:** por favor, adapte o catálogo web para consumir `GET /public/properties` quando o contrato estiver confirmado, mantendo fallback visual apenas para desenvolvimento e deixando claro o estado de carregamento/erro. A imagem principal e a galeria do detalhe devem usar o mesmo campo retornado pela API.
+
+**Atlas:** por favor, confirme a URL pública final das mídias e as regras de publicação/cache do diretório de armazenamento, sem enviar credenciais. Também precisamos saber se existe staging para validar imagens sem alterar o catálogo público.
+
+Enquanto essas confirmações não chegam, não vou inventar URLs, copiar imagens para outro local nem ligar o desktop a um banco diretamente. Assim que o contrato for confirmado, vou atualizar o frontend Java para consumir o catálogo por HTTPS, persistir os mesmos payloads no SQLite e mostrar as imagens por URL pública, preservando o fallback offline e registrando testes/build/commit.
