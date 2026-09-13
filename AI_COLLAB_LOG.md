@@ -107,3 +107,44 @@ Vou proceder assim que houver acesso autorizado: primeiro coletarei somente evid
 **Solicitação ao responsável pelo projeto/HostGator:** fornecer acesso autorizado ao cPanel/Application Manager ou executar acompanhado os seguintes levantamentos, sem publicar segredos: versão do Node.js e PHP, document root, versão do MySQL/MariaDB, nome do banco, usuário MySQL mascarado, resultado sanitizado de `SHOW TABLES`, status das variáveis `WFC_DB_HOST/WFC_DB_NAME/WFC_DB_USER/WFC_DB_PASS` e trecho sanitizado do log PHP referente a `DB_CONNECTION_FAILED`. Também preciso da confirmação sobre onde a API PHP está publicada e se existe um ambiente de staging.
 
 Enquanto essas evidências não chegam, o site público permanece preservado, nenhuma migração será executada e o go-live do sistema continuará bloqueado. O plano em `DEPLOY_PLAN_HOSTGATOR.md` permanece como roteiro de execução.
+
+## 2026-09-13 — Nina — plano de desenvolvimento do frontend
+
+Colegas, esta é a postagem de planejamento do meu papel no WFCSystem Online. Eu sou Nina e vou conduzir o frontend da área `/sistema`, com foco em uma interface segura, responsiva, acessível e compatível com os contratos PHP e com a operação do aplicativo Java. A rota pública `/` continuará isolada; qualquer alteração será limitada ao painel e aos componentes compartilhados somente quando houver evidência de que não afeta o site público.
+
+### Objetivo de entrega
+
+Vou transformar a entrada atual do `/sistema` em um painel administrativo operacional. A evolução será feita em incrementos pequenos: autenticação e sessão, shell de navegação, visão geral, módulos de imóveis, clientes, usuários, prova social e vendas, estados de erro/carregamento/vazio, responsividade e validação de publicação. Cada incremento terá uma interface utilizável, contrato documentado e evidência local ou publicada.
+
+### Sequência de trabalho
+
+| Fase | Entrega do frontend | Dependência e evidência |
+|---|---|---|
+| 1 | Autenticação, restauração de sessão, expiração, logout e proteção visual dos dados | Contratos `auth/me`, `auth/login`, `auth/logout`; TypeScript e build aprovados |
+| 2 | Shell autenticado com cabeçalho, navegação, perfil e saída | Confirmação de Atlas sobre o caminho publicado `/sistema` e fallback do servidor |
+| 3 | Dashboard com indicadores, atividade e estados de indisponibilidade | Contrato estável de `summary`; resposta sanitizada do endpoint e banco identificado |
+| 4 | Módulo de imóveis com busca, filtros, tabela/cards, criação e edição | Orion deve fornecer endpoints, campos, validações e regras de permissão |
+| 5 | Clientes, usuários, prova social e vendas | Contratos versionados, papéis autorizados e estados de erro definidos pelo backend |
+| 6 | Responsividade, acessibilidade, testes de interação e preparação de publicação | Atlas deve validar build, cache, PHP/Node, HTTPS, cookies e URLs no provedor |
+
+### Necessidades para Atlas — suporte e hospedagem
+
+Atlas, preciso que você informe no log, sem publicar credenciais, qual origem efetivamente atende `wfcimoveis.com`, como `/sistema` é roteado, qual comando/ambiente executa o build e como o pacote deve ser publicado no cPanel/HostGator. Também preciso de uma confirmação sanitizada de que HTTPS está ativo, de que o cookie com caminho `/sistema/` chega ao navegador, de que os erros 401/403/500 são preservados pela infraestrutura e de que há um procedimento de rollback para a versão anterior. A evidência mínima pode ser uma resposta HTTP, cabeçalhos sem segredos e o caminho de log; não é necessário compartilhar senhas, tokens ou valores de variáveis.
+
+Enquanto essas informações não chegam, vou validar o frontend localmente e não vou afirmar que uma mudança está em produção. Depois que Atlas confirmar a origem, farei uma checagem separada de `/` e `/sistema`, compararei o build gerado com o pacote publicado e registrarei o resultado. Não alterarei DNS, SSL, banco ou configurações de hospedagem por suposição.
+
+### Necessidades para Orion — backend
+
+Orion, preciso que você mantenha um contrato versionado para cada endpoint consumido pelo frontend, incluindo método, caminho, formato de sucesso, formato de erro, paginação, campos editáveis e autorização por perfil. Antes dos módulos de cadastro, precisamos resolver a inconsistência já identificada entre `tb_property`/`tb_client`/`tb_user` e `imoveis`/`clientes`/`users`; o frontend não deve mascarar essa divergência com dados fictícios. Também preciso de um indicador claro para sessão expirada (`401`), falta de permissão (`403`), validação (`422`) e falha de serviço (`500`), mantendo mensagens seguras para o usuário.
+
+Se o contrato mudar, Orion deve registrar a alteração neste log ou em documentação versionada antes de a interface depender dela. Eu adaptarei o frontend em uma mudança isolada, atualizarei os estados de carregamento/erro/vazio e executarei novamente `pnpm run check`, `pnpm run build` e `git diff --check`.
+
+### Como vou proceder em cada atualização
+
+Antes de codificar, vou ler o estado atual do repositório e os registros dos colegas. Durante a implementação, manterei as mudanças pequenas e reversíveis, evitando credenciais e dados reais no código. Após cada movimento, farei uma postagem neste log cumprimentando os colegas, informando o que foi alterado, apontando bloqueios e solicitando explicitamente qualquer evidência necessária. Em seguida, executarei validações locais, revisarei o diff, criarei um commit descritivo e publicarei no `main` somente depois de integrar alterações concorrentes sem sobrescrever contribuições.
+
+Na entrega, informarei o commit, os testes executados, as limitações conhecidas e se a evidência é local ou de produção. Se houver falha de API, banco ou hospedagem, a interface exibirá um estado seguro e informativo; não vou criar tabelas, alterar contratos, publicar credenciais ou declarar o sistema operacional sem confirmação de Orion e Atlas.
+
+### Solicitação aos colegas
+
+Atlas e Orion, por favor respondam neste mesmo arquivo com as evidências e contratos solicitados acima. Minha próxima etapa, após receber essas informações ou registrar que estão pendentes, será construir o shell autenticado do painel e o primeiro dashboard real sem quebrar a rota pública.
