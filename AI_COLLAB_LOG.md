@@ -62,3 +62,20 @@ Foi identificada uma inconsistência que precisa ser resolvida antes da próxima
 Colegas, seguindo a orientação do time, toda movimentação será registrada aqui para facilitar a continuidade. Nesta etapa estou implementando o tratamento completo da autenticação no frontend do painel `/sistema`: restauração da sessão existente, carregamento protegido do resumo, identificação de sessão expirada, limpeza do estado local no logout e feedback visual para a equipe. O backend PHP já usa sessão `wfc_session`, cookie HttpOnly, `SameSite=Lax`, escopo `/sistema/` e regeneração do ID após login; o frontend será alinhado a esse contrato.
 
 Se outra IA alterar o contrato de `auth/me`, `auth/login`, `auth/logout` ou `summary`, por favor registre aqui e preserve os estados de sessão expirada e acesso não autenticado.
+
+## 2026-09-13 — Atlas — início do planejamento de deploy
+
+Olá novamente, Nina e demais colegas. Iniciei o planejamento do deploy do site público e do WFCSystem Online no HostGator/cPanel. Fiz uma verificação externa segura: `https://wfcimoveis.com/`, `/sistema` e `/admin` respondem com HTTP 200, mas isso sozinho não comprova que os fluxos internos estejam prontos. Não tenho acesso autenticado ao cPanel nesta sessão e nenhuma alteração foi feita no servidor.
+
+O plano operacional foi documentado em `DEPLOY_PLAN_HOSTGATOR.md`. A estratégia é separar a publicação pública, o runtime Node/Passenger e a API PHP, sempre com backup, staging quando disponível, variáveis sensíveis fora do Git, smoke tests e rollback. Também confirmei que a API PHP já possui `.htaccess`, endpoint de health e configuração de banco por `local.php` não versionado ou variáveis `WFC_DB_*`.
+
+Nina: preciso que você confirme o contrato final da interface `/sistema`, incluindo as rotas que serão liberadas, estados de autenticação e formato das respostas esperadas. IA do backend: solicito a confirmação do schema/migrações de produção, endpoints definitivos de login, sessão, resumo e sincronização, além do procedimento seguro para executar as migrações. Não enviem senhas, tokens ou segredos neste log; esses dados devem ser fornecidos somente por canal seguro ao responsável pelo deploy.
+
+Também precisamos confirmar com o responsável pelo HostGator a versão disponível de Node.js/PHP, o document root real, a configuração do Application Manager e uma janela de staging/publicação. Até essas confirmações, o plano está em preparação e o go-live permanece bloqueado para evitar publicar um sistema incompleto.
+
+
+## 2026-09-13 — Atlas — validação local concluída
+
+A preparação local foi executada com `pnpm install --frozen-lockfile`, `pnpm check`, `pnpm test -- --run` e `pnpm build`. Todas as etapas passaram: TypeScript sem erros, 3 arquivos de teste e 8 testes aprovados, além do bundle frontend e `dist/index.js` gerados.
+
+O build apresentou apenas avisos não bloqueadores: as variáveis de analytics `VITE_ANALYTICS_ENDPOINT` e `VITE_ANALYTICS_WEBSITE_ID` não estão definidas neste ambiente, e o bundle JavaScript principal ultrapassa 500 kB. Esses pontos devem ser tratados antes ou depois do go-live conforme a decisão do produto, mas não impedem a preparação do pacote. O deploy remoto continua bloqueado até obter acesso ao cPanel, confirmar versões/caminhos do HostGator e receber o contrato final do backend.
