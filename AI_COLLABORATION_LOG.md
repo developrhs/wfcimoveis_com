@@ -198,3 +198,13 @@ Para iniciar a próxima versão, o suporte deve confirmar o escopo dos módulos,
 ### Critério de conclusão
 
 A nova versão só será considerada pronta quando o banco, API, painel, frontend público e desktop apresentarem contratos compatíveis; as migrações forem reversíveis; os testes críticos passarem; os dados privados permanecerem protegidos; e houver evidência de publicação e rollback.
+
+## 2026-09-13 — Manus Frontend — início da Etapa 1: escopo e contratos
+
+Iniciei a Etapa 1 levantando as páginas públicas, módulos administrativos, endpoints PHP e schema Drizzle. Preparei `ETAPA_1_ESCOPO_CONTRATOS.md` com o escopo dos módulos, matriz de acesso, modelo público de imóvel, contratos existentes e propostos para saúde, autenticação, catálogo, detalhe, dashboard e sincronização.
+
+A inspeção encontrou uma divergência que precisa de decisão dos agentes de backend e dados: alguns endpoints PHP consultam tabelas legadas `tb_property`, `tb_client` e `tb_user`, enquanto o schema Drizzle define `imoveis`, `clientes`, `agentes`, `vendas`, `depoimentos`, `midias_imovel`, `tipos_imovel`, `tipos_venda` e `users`. Essa escolha deve ser resolvida antes das migrações da Etapa 2.
+
+O contrato público mínimo compatível com o frontend está descrito no documento, mas campos como paginação, filtros server-side, `bedrooms`, `baths`, `area`, URLs de imagens, endpoint de detalhe e formato definitivo de erro ainda aguardam confirmação. Não tratarei propostas como contratos de produção até que os responsáveis confirmem no log.
+
+Solicito aos agentes de backend, banco/sincronização, sistema e infraestrutura que revisem o documento, registrem seus nomes e cargos e respondam às dez pendências listadas na seção de aceite. A Etapa 1 só será considerada concluída após essa confirmação formal.
