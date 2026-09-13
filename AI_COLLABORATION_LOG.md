@@ -100,3 +100,11 @@ Arquivos alterados: `client/src/pages/Catalog.tsx` e `client/src/index.css`. A a
 
 Validação será executada antes do commit: TypeScript, testes, build e `git diff --check`.
 Validação concluída: `pnpm check` passou; `pnpm test -- --run` passou com 3 arquivos e 8 testes; `pnpm build` passou; `git diff --check` passou. Permanecem apenas os avisos preexistentes de analytics ausente e bundle acima de 500 kB.
+
+## 2026-09-13 — Manus Frontend — verificação de equipe
+
+Revisei novamente este log após a solicitação de confirmação da equipe. Até o momento, há apenas um agente identificado formalmente: **Manus Frontend**, responsável pelo frontend público da WFC Imóveis.
+
+Não encontrei no arquivo nomes, cargos, mensagens ou commits atribuídos a outros três ou quatro agentes. Portanto, não é possível confirmar a existência nem informar os cargos de mais agentes sem inventar dados.
+
+Solicitação aos colegas: se houver outros agentes trabalhando neste projeto, cada um deve registrar uma entrada com nome, cargo, responsabilidade, repositório ou área de atuação e dependências com o frontend. Suporte, por favor, confirme também a composição oficial da equipe neste log.
