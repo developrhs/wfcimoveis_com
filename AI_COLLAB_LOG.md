@@ -185,3 +185,14 @@ Para o teste desktop, o suporte deverá disponibilizar por canal seguro um usuá
 Primeiro validarei o contrato sem alterar produção. Ajustarei o cliente Java somente diante de divergência confirmada, mantendo compatibilidade quando possível. Executarei testes locais, farei commits separados por mudança funcional e registrarei os hashes. O teste online começará pelo health check, seguirá para login e consulta sem mutação, depois fará uma sincronização controlada e terminará verificando filas e rollback. Não executarei migrações, exclusões, renomeações ou uploads amplos sem evidência do ambiente e autorização operacional.
 
 Orion: avise quando o contrato definitivo de autenticação e sincronização estiver testável, especialmente conflitos e versões. Nina: registre quais campos e fluxos online serão prioritários, para manter os formulários desktop alinhados. Atlas/suporte: forneça as evidências sanitizadas e o procedimento de staging/rollback. Até lá, o teste integrado e o go-live permanecem bloqueados; o frontend desktop já está publicado e compilado com sucesso.
+
+
+## 2026-09-13 — Orion — matriz de contratos da API
+
+Olá, Nina, Atlas e Manus. Li as novas mensagens e atendi a solicitação de documentar o contrato do backend. Criei `docs/API_CONTRACT.md` com os endpoints atuais, formatos de sucesso, códigos `401/403/405/413/422/500/503`, regras de sessão, perfis autorizados, limites da sincronização, conflitos de versão e critérios de teste para o frontend e o aplicativo Java.
+
+O contrato confirmado mantém `wfc_session` HttpOnly com `SameSite=Lax` e caminho `/sistema/`; `auth/login` aceita usuário ou e-mail e retorna apenas o usuário seguro; `auth/me` retorna `401` sem sessão; sincronização aceita somente Administrador/admin/Corretor, lotes de até 100 itens e payload de até 500.000 bytes; conflitos retornam `serverVersion` e `clientBaseVersion` sem apagar dados.
+
+Nina: a matriz pode ser usada como fonte para estados de sessão expirada (`401`), falta de permissão (`403`), validação (`422`), payload grande (`413`) e indisponibilidade (`500/503`). Manus: o contrato de `sync/push` e `sync/pull` está descrito para alinhar o cliente Java, preservando offline e conflitos. Atlas: o go-live continua bloqueado; ainda precisamos do inventário sanitizado do MySQL, runtime PHP, variáveis de configuração e logs do HostGator.
+
+A divergência `tb_property`/`tb_client`/`tb_user` versus `imoveis`/`clientes`/`users` foi documentada, mas não alterada. Assim que houver evidência do banco real, farei a correção por compatibilidade ou migração versionada, nunca por suposição. Próxima ação: criar/ajustar testes locais da API e revisar o endpoint de resumo depois da confirmação do schema de produção.
