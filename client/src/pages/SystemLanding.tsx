@@ -3,6 +3,15 @@ import { ArrowRight, Building2, CheckCircle2, LockKeyhole, ShieldCheck, Users } 
 
 type User = { name?: string; username?: string; role?: string };
 type Summary = { properties: number; clients: number; users: number };
+class SystemApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "SystemApiError";
+    this.status = status;
+  }
+}
 
 async function systemApi<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/sistema/api/v1/${path}`, {
@@ -11,7 +20,7 @@ async function systemApi<T>(path: string, init?: RequestInit): Promise<T> {
     headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
   });
   const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(body.error ?? "Não foi possível concluir a operação.");
+  if (!response.ok) throw new SystemApiError(body.error ?? "Não foi possível concluir a operação.", response.status);
   return body as T;
 }
 
@@ -22,6 +31,8 @@ export default function SystemLanding() {
   const [user, setUser] = useState<User | null>(null);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [sessionChecking, setSessionChecking] = useState(true);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
@@ -31,8 +42,12 @@ export default function SystemLanding() {
     try {
       const result = await systemApi<{ data: Summary }>("summary");
       setSummary(result.data);
-    } catch {
+    } catch (summaryError) {
       setSummary(null);
+      if (summaryError instanceof SystemApiError && summaryError.status === 401) {
+        setUser(null);
+        setNotice("Sua sessão expirou. Entre novamente para acessar os dados.");
+      }
     } finally {
       setSummaryLoading(false);
     }
@@ -44,7 +59,8 @@ export default function SystemLanding() {
         setUser(currentUser);
         await loadSummary();
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => setSessionChecking(false));
   }, []);
 
   function openLogin() {
@@ -76,10 +92,15 @@ export default function SystemLanding() {
   }
 
   async function handleLogout() {
-    await systemApi("auth/logout", { method: "POST" }).catch(() => undefined);
-    setUser(null);
-    setSummary(null);
-    setNotice("Sessão encerrada.");
+    setLogoutLoading(true);
+    try {
+      await systemApi("auth/logout", { method: "POST" });
+    } finally {
+      setUser(null);
+      setSummary(null);
+      setLogoutLoading(false);
+      setNotice("Sessão encerrada.");
+    }
   }
 
   return (
@@ -99,7 +120,7 @@ export default function SystemLanding() {
             <h1 className="max-w-3xl text-5xl font-bold leading-[1.05] tracking-[-0.04em] sm:text-6xl">A operação da sua imobiliária em um só lugar.</h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-300">Um espaço separado do site público para organizar imóveis, clientes, prova social e usuários da equipe.</p>
             <div className="mt-10 flex flex-wrap items-center gap-4">
-              {user ? <button onClick={handleLogout} className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3.5 font-semibold shadow-xl shadow-blue-500/20 transition hover:bg-blue-400">Sair de {user.name || user.username} <ArrowRight className="h-4 w-4" /></button> : <button onClick={openLogin} className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3.5 font-semibold shadow-xl shadow-blue-500/20 transition hover:bg-blue-400">Entrar no sistema <ArrowRight className="h-4 w-4" /></button>}
+              {user ? <button disabled={logoutLoading} onClick={handleLogout} className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3.5 font-semibold shadow-xl shadow-blue-500/20 transition hover:bg-blue-400 disabled:cursor-wait disabled:opacity-60">{logoutLoading ? "Encerrando…" : `Sair de ${user.name || user.username}`} <ArrowRight className="h-4 w-4" /></button> : <button disabled={sessionChecking} onClick={openLogin} className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3.5 font-semibold shadow-xl shadow-blue-500/20 transition hover:bg-blue-400 disabled:cursor-wait disabled:opacity-60">{sessionChecking ? "Verificando sessão…" : "Entrar no sistema"} <ArrowRight className="h-4 w-4" /></button>}
               <span className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-5 py-3.5 text-sm text-slate-300"><LockKeyhole className="h-4 w-4 text-blue-300" /> Acesso restrito à equipe</span>
             </div>
             {notice && <p className="mt-5 flex items-center gap-2 text-sm text-emerald-300"><CheckCircle2 className="h-4 w-4" />{notice}</p>}
