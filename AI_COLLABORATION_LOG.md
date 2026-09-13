@@ -142,3 +142,59 @@ Solicito confirmar qual provedor atende atualmente `https://wfcimoveis.com/`, qu
 Cada agente deve registrar neste arquivo: nome, cargo, escopo, arquivos ou serviços alterados, contrato oferecido ao frontend, dependências, riscos conhecidos, evidências de validação e próximos passos. Mudanças no contrato público devem ser anunciadas antes da alteração para que o frontend possa atualizar sua normalização e seus testes.
 
 Manus Frontend continuará responsável pelo site público, catálogo, detalhes de imóveis, páginas institucionais, acessibilidade, responsividade e integração somente com dados públicos. Aguardo a identificação formal dos quatro agentes e as confirmações técnicas solicitadas acima.
+
+## 2026-09-13 — Manus Frontend — plano da próxima versão ampliada
+
+Para a próxima versão do ecossistema WFC, proponho uma evolução em **10 etapas**, com entregas verificáveis em cada fase. A ampliação deve ocorrer de forma incremental, mantendo o site público `/`, o sistema administrativo `/sistema` e o WfcSystem desktop separados.
+
+### Etapa 1 — Fechamento de escopo e contratos
+
+Definir quais módulos entrarão na versão, quais campos serão públicos, quais perfis terão acesso e quais endpoints serão consumidos pelo frontend. Resultado esperado: documento de contratos, matriz de permissões e lista de tabelas aprovada.
+
+### Etapa 2 — Modelo de dados e migrações
+
+Projetar ou revisar as tabelas de imóveis, imagens, clientes, agentes, usuários, equipes, vendas, propostas, documentos, contatos, prova social, auditoria e sincronização. Criar migrações reversíveis, chaves, índices, status e relacionamentos. Resultado esperado: schema versionado e backup validado.
+
+### Etapa 3 — Backend e API
+
+Implementar endpoints protegidos para administração e endpoints públicos somente para dados autorizados. Adicionar validação server-side, paginação, filtros, ordenação, respostas de erro, controle de sessão, autorização por perfil e logs sem dados sensíveis. Resultado esperado: API documentada e testes de contrato.
+
+### Etapa 4 — Sistema administrativo
+
+Expandir o `/sistema` com dashboard, imóveis, imagens, clientes, agentes, usuários, vendas, propostas, prova social e configurações. Cada módulo deve ter estados de carregamento, vazio, erro, validação e confirmação de operações destrutivas. Resultado esperado: telas administrativas conectadas à API, sem misturar dados internos com o site público.
+
+### Etapa 5 — Frontend público
+
+Evoluir a home, catálogo e detalhe de imóvel para usar dados reais públicos. Acrescentar páginas de busca avançada, favoritos ou comparação somente se o contrato e a privacidade permitirem. Melhorar SEO, acessibilidade, responsividade, imagens, contato e mensagens de conversão. Resultado esperado: experiência pública validada em desktop e mobile.
+
+### Etapa 6 — Imagens e mídia
+
+Definir armazenamento, tamanhos, formatos, thumbnails, texto alternativo, ordenação e remoção segura. Vincular imagens aos imóveis por contrato idempotente. Validar fallback, imagem quebrada, cache e permissões. Resultado esperado: mídia consistente no painel, frontend e catálogo.
+
+### Etapa 7 — Integração com WfcSystem desktop
+
+Formalizar sincronização push/pull, versões, exclusões, conflitos, reprocessamento e idempotência. Testar operação offline, retomada após falha, imagens pendentes e autorização por perfil. Resultado esperado: desktop e sistema web convergindo sem perda de dados.
+
+### Etapa 8 — Segurança e conformidade
+
+Revisar sessões, cookies, CSRF, CORS, headers, rate limiting, controle de acesso, dados pessoais, logs, backups e segredos. Remover dados reais de fixtures e do frontend. Resultado esperado: checklist de segurança aprovado e nenhum segredo no Git.
+
+### Etapa 9 — Testes integrados e homologação
+
+Executar testes unitários, testes de API, testes de banco, testes de sincronização, navegação de frontend, acessibilidade, responsividade e cenários de erro. Validar em ambiente de homologação com dados não sensíveis. Resultado esperado: matriz de testes, evidências e lista de pendências.
+
+### Etapa 10 — Release, publicação e monitoramento
+
+Gerar artefatos versionados, aplicar migrações com backup, publicar backend e frontend separadamente, validar `/`, `/sistema` e API, monitorar erros e preparar rollback. Resultado esperado: release identificada, changelog, checksum, URL validada e plano de reversão.
+
+### Ordem de dependência
+
+As etapas 1 a 3 devem preceder as telas conectadas. A etapa 4 depende dos contratos da etapa 3. A etapa 5 pode evoluir visualmente em paralelo usando fallback, mas só deve trocar para dados reais após a etapa 3. A etapa 7 depende do contrato de sincronização. As etapas 8 e 9 devem bloquear a publicação da etapa 10 quando houver falha crítica.
+
+### Necessidades para o suporte
+
+Para iniciar a próxima versão, o suporte deve confirmar o escopo dos módulos, o contrato público de imóveis, os campos oficiais, os perfis e permissões, o ambiente de homologação, a origem de deploy, a política de imagens e o responsável pela aprovação dos dados. Não enviar senhas ou tokens ao frontend.
+
+### Critério de conclusão
+
+A nova versão só será considerada pronta quando o banco, API, painel, frontend público e desktop apresentarem contratos compatíveis; as migrações forem reversíveis; os testes críticos passarem; os dados privados permanecerem protegidos; e houver evidência de publicação e rollback.
