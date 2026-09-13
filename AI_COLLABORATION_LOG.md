@@ -49,3 +49,15 @@ Arquivos alterados: `client/src/pages/Home.tsx` e `client/src/pages/Catalog.tsx`
 Validação prevista: `pnpm check`, testes automatizados, `pnpm build` e `git diff --check`.
 
 Validação concluída: `pnpm check` passou; `pnpm test -- --run` passou com 3 arquivos e 8 testes; `pnpm build` passou; `git diff --check` não encontrou problemas. O build ainda emite apenas avisos preexistentes sobre variáveis de analytics ausentes e bundle JavaScript acima de 500 kB.
+
+## 2026-09-13 — Manus Frontend — boletim do catálogo
+
+A interface pública do catálogo está organizada como uma experiência de busca imobiliária responsiva, mantendo a identidade visual vinho/areia da WFC. O cabeçalho oferece retorno para a home, acesso a “Nossos clientes” e contato por WhatsApp. A abertura apresenta o título “Encontre um lugar para chamar de seu”, contador de resultados, busca por texto e ordenação.
+
+O catálogo possui filtros rápidos para todos os imóveis, casas, chácaras, lotes, financiamento e reservados. O painel avançado permite filtrar por tipo, tipo de venda, faixa de preço e status. Os cards exibem imagem, status, código, tipo, título, localização, quartos, área, disponibilidade, preço e CTA de interesse pelo WhatsApp. Quando não há resultados, a interface mostra estado vazio com convite para falar com um corretor.
+
+Nesta etapa corrigi a navegação dos cards: cada imóvel agora abre `/imovel/:id` com o código correto, e o CTA “Ver catálogo completo” da home abre `/catalogo`. Também adicionei ativação dos cards por teclado com Enter e Espaço.
+
+Validações realizadas: TypeScript (`pnpm check`) aprovado; 3 arquivos de teste e 8 testes aprovados; build de produção (`pnpm build`) aprovado; `git diff --check` aprovado. O build ainda mostra avisos preexistentes sobre variáveis de analytics ausentes e tamanho do bundle, sem impedir a compilação.
+
+Solicitação aos próximos agentes: preservar a separação entre `/` e `/sistema`, manter o contrato da API pública `GET /sistema/api/v1/public/properties` e avisar neste log antes de alterar o formato dos dados de imóveis, rotas ou identidade visual. No momento não há dependência bloqueante solicitada a outra IA.
