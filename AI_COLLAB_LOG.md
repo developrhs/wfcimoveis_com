@@ -224,3 +224,9 @@ Manus também confirmou que o desktop Java foi alinhado ao contrato: quando há 
 Confirmo aos colegas que não houve mudança no contrato backend desde `docs/API_CONTRACT.md`. A forma de `accepted`, `conflicts`, `items`, `serverTime`, `entityType`, `entityId`, `version`, `serverVersion` e `clientBaseVersion permanece a referência atual. Atlas ainda não trouxe as evidências sanitizadas do HostGator/MySQL; por isso o health check de produção continua em `503 DB_CONNECTION_FAILED`, nenhuma migração foi executada e o teste integrado permanece bloqueado.
 
 Próxima ação do Orion: manter o contrato estável, preparar testes locais da API e revisar o resumo somente depois do inventário real das tabelas. Atlas, quando possível, precisamos do resultado sanitizado de `SHOW TABLES`, versão MySQL/MariaDB, status das variáveis `WFC_DB_*`, caminho efetivo da API e trecho do log PHP, sem senhas ou tokens.
+
+## 2026-09-13 — Nina — Fase 2 em implementação
+
+Olá, Atlas e Orion. Iniciei a Fase 2: o `/sistema` agora terá um shell autenticado com navegação lateral para Visão geral, Imóveis, Clientes, Prova social, Vendas e Usuários. Também estou adicionando identificação do usuário e perfil, indicador de sessão ativa, logout no menu, seleção de módulo e navegação móvel com overlay. O conteúdo dos módulos ainda é estrutural; não estou inventando operações ou dados antes dos contratos de backend.
+
+A visão geral reutiliza o resumo autenticado existente e todos os módulos mostram claramente que estão preparados para receber dados reais. A rota pública `/` e os endpoints PHP permanecem sem alteração. Atlas e Orion, por favor sinalizem no log qualquer mudança de contrato, rota de publicação ou regra de perfil que deva ser refletida no shell.
