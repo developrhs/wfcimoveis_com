@@ -2,6 +2,7 @@ import { FormEvent, useEffect, useState } from "react";
 import { ArrowRight, Building2, CheckCircle2, LockKeyhole, ShieldCheck, Users } from "lucide-react";
 
 type User = { name?: string; username?: string; role?: string };
+type Summary = { properties: number; clients: number; users: number };
 
 async function systemApi<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/sistema/api/v1/${path}`, {
@@ -19,12 +20,31 @@ export default function SystemLanding() {
   const [identity, setIdentity] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState<User | null>(null);
+  const [summary, setSummary] = useState<Summary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState("");
 
+  async function loadSummary() {
+    setSummaryLoading(true);
+    try {
+      const result = await systemApi<{ data: Summary }>("summary");
+      setSummary(result.data);
+    } catch {
+      setSummary(null);
+    } finally {
+      setSummaryLoading(false);
+    }
+  }
+
   useEffect(() => {
-    systemApi<{ user: User }>("auth/me").then(({ user: currentUser }) => setUser(currentUser)).catch(() => undefined);
+    systemApi<{ user: User }>("auth/me")
+      .then(async ({ user: currentUser }) => {
+        setUser(currentUser);
+        await loadSummary();
+      })
+      .catch(() => undefined);
   }, []);
 
   function openLogin() {
@@ -44,6 +64,7 @@ export default function SystemLanding() {
         body: JSON.stringify({ identity: identity.trim(), password }),
       });
       setUser(result.user);
+      await loadSummary();
       setPassword("");
       setLoginOpen(false);
       setNotice(`Sessão iniciada para ${result.user.name || result.user.username || "usuário"}.`);
@@ -57,6 +78,7 @@ export default function SystemLanding() {
   async function handleLogout() {
     await systemApi("auth/logout", { method: "POST" }).catch(() => undefined);
     setUser(null);
+    setSummary(null);
     setNotice("Sessão encerrada.");
   }
 
@@ -86,7 +108,7 @@ export default function SystemLanding() {
           <div className="rounded-3xl border border-white/10 bg-white/[0.06] p-5 shadow-2xl shadow-black/20 backdrop-blur">
             <div className="rounded-2xl border border-white/10 bg-[#111f3d] p-6">
               <div className="flex items-center justify-between"><div><p className="text-sm text-slate-400">Visão geral</p><p className="mt-1 text-xl font-semibold">Central de gestão</p></div><ShieldCheck className="h-6 w-6 text-blue-300" /></div>
-              <div className="mt-7 grid grid-cols-2 gap-3"><div className="rounded-xl bg-white/[0.06] p-4"><p className="text-xs text-slate-400">Imóveis</p><p className="mt-2 text-2xl font-bold">—</p></div><div className="rounded-xl bg-white/[0.06] p-4"><p className="text-xs text-slate-400">Clientes</p><p className="mt-2 text-2xl font-bold">—</p></div><div className="rounded-xl bg-white/[0.06] p-4"><p className="text-xs text-slate-400">Equipe</p><p className="mt-2 text-2xl font-bold">—</p></div><div className="rounded-xl bg-blue-500/20 p-4"><p className="text-xs text-blue-200">Status</p><p className="mt-2 flex items-center gap-2 text-sm font-semibold text-blue-100"><span className="h-2 w-2 rounded-full bg-emerald-400" /> Preparado</p></div></div>
+              <div className="mt-7 grid grid-cols-2 gap-3"><div className="rounded-xl bg-white/[0.06] p-4"><p className="text-xs text-slate-400">Imóveis</p><p className="mt-2 text-2xl font-bold">{summaryLoading ? "…" : summary?.properties ?? "—"}</p></div><div className="rounded-xl bg-white/[0.06] p-4"><p className="text-xs text-slate-400">Clientes</p><p className="mt-2 text-2xl font-bold">{summaryLoading ? "…" : summary?.clients ?? "—"}</p></div><div className="rounded-xl bg-white/[0.06] p-4"><p className="text-xs text-slate-400">Equipe</p><p className="mt-2 text-2xl font-bold">{summaryLoading ? "…" : summary?.users ?? "—"}</p></div><div className="rounded-xl bg-blue-500/20 p-4"><p className="text-xs text-blue-200">Status</p><p className="mt-2 flex items-center gap-2 text-sm font-semibold text-blue-100"><span className="h-2 w-2 rounded-full bg-emerald-400" /> {user ? "Operação ativa" : "Preparado"}</p></div></div>
               <div className="mt-4 flex items-center gap-3 rounded-xl border border-white/10 p-4 text-sm text-slate-300"><Users className="h-5 w-5 text-blue-300" /> Módulos administrativos em construção</div>
             </div>
           </div>
