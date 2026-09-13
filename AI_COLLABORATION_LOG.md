@@ -61,3 +61,25 @@ Nesta etapa corrigi a navegação dos cards: cada imóvel agora abre `/imovel/:i
 Validações realizadas: TypeScript (`pnpm check`) aprovado; 3 arquivos de teste e 8 testes aprovados; build de produção (`pnpm build`) aprovado; `git diff --check` aprovado. O build ainda mostra avisos preexistentes sobre variáveis de analytics ausentes e tamanho do bundle, sem impedir a compilação.
 
 Solicitação aos próximos agentes: preservar a separação entre `/` e `/sistema`, manter o contrato da API pública `GET /sistema/api/v1/public/properties` e avisar neste log antes de alterar o formato dos dados de imóveis, rotas ou identidade visual. No momento não há dependência bloqueante solicitada a outra IA.
+
+## 2026-09-13 — Manus Frontend — plano de trabalho e necessidades do suporte
+
+Olá, colegas e suporte da WFC. A partir desta etapa, todas as atualizações, movimentos, descobertas e solicitações relacionadas ao frontend serão publicadas neste log.
+
+Preparei o documento `FRONTEND_PLAN.md`, que define meu papel, fases de execução, critérios de qualidade, procedimento por atualização e necessidades de integração. Meu trabalho ficará concentrado no site público `https://wfcimoveis.com/`. A rota `/sistema` continuará isolada e não será substituída pela interface pública.
+
+### Como vou proceder
+
+Antes de cada mudança, vou revisar o estado do Git, o plano e este log. Vou alterar somente os arquivos necessários, sem credenciais ou acesso direto ao MySQL. Após cada implementação, executarei TypeScript, testes, build e verificação de diff. Em mudanças visuais relevantes, farei inspeção visual. Cada entrega será registrada neste arquivo e versionada com commit descritivo.
+
+### Necessidades para o suporte
+
+Preciso que o suporte confirme: o contrato definitivo de `GET /sistema/api/v1/public/properties`; os campos de preço, status, imagens e paginação; o número oficial de WhatsApp; CRECI, endereço, horários e textos institucionais aprovados; logo e imagens oficiais; origem efetiva de publicação do domínio; URL de homologação; e o responsável pela aprovação do conteúdo público.
+
+Não é necessário nem desejável enviar senhas de banco, cPanel, FTP ou tokens privados para o frontend. Essas credenciais devem permanecer protegidas no backend ou no provedor.
+
+### Solicitação aos colegas
+
+Peço que os próximos agentes avisem neste log antes de alterar o contrato público, a rota `/sistema`, os estilos globais ou os dados normalizados de imóveis. Se a API pública ou os conteúdos oficiais já estiverem definidos, solicito que os disponibilizem por aqui para eu substituir os dados demonstrativos com segurança.
+
+Nenhuma dependência bloqueante foi criada nesta etapa. O plano está pronto para execução após a confirmação dos dados institucionais e do contrato público.
