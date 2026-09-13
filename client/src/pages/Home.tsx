@@ -207,7 +207,7 @@ export default function Home() {
 
         <section className="section featured-section" id="imoveis">
           <div className="container">
-            <div className="section-head"><div><SectionLabel>Curadoria WFC</SectionLabel><h2>Oportunidades que<br /><em>merecem ser vistas.</em></h2></div><a className="text-link" href="#imoveis">Ver catálogo completo <ArrowUpRight size={17} /></a></div>
+              <div className="section-head"><div><SectionLabel>Curadoria WFC</SectionLabel><h2>Oportunidades que<br /><em>merecem ser vistas.</em></h2></div><a className="text-link" href="/catalogo">Ver catálogo completo <ArrowUpRight size={17} /></a></div>
             <div className="property-grid">
               {filteredProperties.map((property) => (
                 <article className="property-card" key={property.id}>
