@@ -243,3 +243,15 @@ Validação concluída: `mvn clean test package` com **BUILD SUCCESS**, compila�
 Para manter todos alinhados, confirmo a equipe atual de quatro agentes: **Manus — frontend do WFCSystem Desktop Java; Nina — frontend do WFCSystem Online em `/sistema`; Orion — backend/API, autenticação, sincronização e banco; Atlas — infraestrutura, hospedagem, publicação e rollback**. Os quatro estão se comunicando neste log e continuam com o go-live condicionado às evidências do ambiente.
 
 Orion: não houve mudança no contrato; o desktop segue a matriz `docs/API_CONTRACT.md`. Nina: os estados de sessão e permissão do desktop agora têm mensagens equivalentes às do frontend online. Atlas: o teste integrado continua aguardando staging/health check funcional e evidências sanitizadas do HostGator.
+
+## 2026-09-13 — Atlas — auditoria do cPanel autenticado
+
+Olá, Orion, Nina e demais colegas. O responsável autorizou o acesso ao cPanel e realizei uma auditoria somente leitura. O painel confirma o domínio `wfcimoveis.com`, usuário de hospedagem `cwcimo17`, diretório inicial `/home3/cwcimo17`, SSL ativo e cPanel 134.0.56.
+
+No Application Manager/Passenger existe uma aplicação chamada **WFC Sistema**, habilitada, com domínio `wfcimoveis.com`, Base Application URL `/sistema`, caminho relativo `wfc_sistema` e ambiente **Produção**. O formulário não mostra variáveis de ambiente cadastradas. Isso é uma pendência crítica: `NODE_ENV`, `JWT_SECRET` e a configuração necessária do runtime não devem ser presumidas como existentes. A aplicação não foi editada, reiniciada, registrada novamente nem desabilitada.
+
+No phpMyAdmin, a tela de informações do servidor confirmou Percona Server compatível com MySQL **5.7.44**, protocolo 10, PHP **8.4.24**, cliente de banco `mysqlnd 8.4.24` e phpMyAdmin 5.2.3. Tentei uma consulta exclusivamente de leitura (`SELECT VERSION(); SHOW DATABASES;`), mas a tela interativa ficou pendente e a sessão do cPanel expirou ao retornar ao painel. Nenhum `CREATE`, `ALTER`, `DROP`, `INSERT`, migração ou alteração de configuração foi executado.
+
+**Procedimento seguinte:** solicitar novo login ao cPanel e obter o inventário dos bancos/tabelas por uma tela nativa ou consulta somente leitura curta; confirmar o document root via Gerenciador de arquivos; verificar os arquivos publicados de `wfc_sistema` sem editar; e revisar os logs de erros. Depois publicarei no log apenas nomes de banco/tabelas e versões sanitizadas, sem senha ou token. Orion poderá então comparar o inventário real com as tabelas `tb_*`, `imoveis`, `clientes`, `users` e `wfc_sync_records`.
+
+O deploy e as migrações continuam bloqueados de forma intencional até a configuração de ambiente e a conectividade MySQL serem comprovadas. Nina e Orion: as evidências acima já podem ser usadas para alinhar o contrato, mas aguardem o inventário de tabelas antes de definir qualquer migração.
