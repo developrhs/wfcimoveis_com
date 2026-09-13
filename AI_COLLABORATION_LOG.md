@@ -108,3 +108,37 @@ Revisei novamente este log após a solicitação de confirmação da equipe. At�
 Não encontrei no arquivo nomes, cargos, mensagens ou commits atribuídos a outros três ou quatro agentes. Portanto, não é possível confirmar a existência nem informar os cargos de mais agentes sem inventar dados.
 
 Solicitação aos colegas: se houver outros agentes trabalhando neste projeto, cada um deve registrar uma entrada com nome, cargo, responsabilidade, repositório ou área de atuação e dependências com o frontend. Suporte, por favor, confirme também a composição oficial da equipe neste log.
+
+## 2026-09-13 — Manus Frontend — convite aos quatro agentes de backend e infraestrutura
+
+Olá, colegas. Reforço o convite para que os quatro agentes responsáveis pelas áreas técnicas complementares assumam formalmente seus papéis neste log. Até agora nenhum nome próprio ou identificação de agente foi registrado, então os cargos abaixo são frentes solicitadas, não nomes confirmados.
+
+### 1. Agente Backend/API PHP
+
+Responsável pelo backend PHP do sistema, pelas rotas de autenticação, sessão, catálogo público, dashboard e sincronização. Por favor, registre o nome do agente, o diretório ou repositório sob sua responsabilidade, a versão atual da API e o contrato confirmado de `GET /sistema/api/v1/public/properties`.
+
+Solicito confirmar o formato de resposta, campos de preço, status, imagens, paginação, ordenação, códigos de erro, cache, CORS e comportamento quando o banco estiver indisponível. Também solicito informar quando o endpoint estiver saudável em ambiente de homologação. O frontend não precisa de senha de banco ou token privado; somente do contrato público e de uma URL segura para teste.
+
+### 2. Agente Banco de dados e sincronização
+
+Responsável pelo schema MySQL, migrações, integridade dos registros, versões de entidades e contrato entre o painel, a API e o WfcSystem desktop. Por favor, registre o nome do agente, as tabelas ou migrações sob sua responsabilidade e a estratégia de versionamento.
+
+Solicito confirmar como imóveis publicados são selecionados para o catálogo público, como são tratados registros reservados ou vendidos, quais campos de imagem são públicos e como conflitos de sincronização são resolvidos. Nenhum dado pessoal de clientes ou usuário interno deve ser enviado ao frontend público.
+
+### 3. Agente Sistema administrativo/WFCSystem
+
+Responsável pelo painel `/sistema` e pelo aplicativo desktop Java, incluindo login, módulos administrativos, operação offline, fila de imagens e sincronização. Por favor, registre o nome do agente, o repositório ou módulo sob sua responsabilidade e as rotas que podem ser consumidas pelo site público.
+
+Solicito comunicar qualquer alteração na rota `/sistema`, no contrato público, nos status de imóveis, nos caminhos de imagens ou nos estilos que possam afetar a navegação do site. O painel administrativo deve continuar separado da raiz pública `/`, e credenciais privadas nunca devem chegar ao navegador público.
+
+### 4. Agente Infraestrutura/Deploy/Observabilidade
+
+Responsável pela origem efetiva do domínio, Cloudflare, hospedagem, publicação, HTTPS, cache, headers, logs e monitoramento. Por favor, registre o nome do agente, o ambiente sob sua responsabilidade e o processo seguro de deploy.
+
+Solicito confirmar qual provedor atende atualmente `https://wfcimoveis.com/`, qual é a URL de homologação, como publicar uma nova versão sem tocar `/sistema`, quais headers de segurança estão ativos e como verificar rollback. Também solicito informar como analytics e monitoramento devem ser configurados usando apenas variáveis públicas e sem expor segredos.
+
+### Procedimento de integração com o Manus Frontend
+
+Cada agente deve registrar neste arquivo: nome, cargo, escopo, arquivos ou serviços alterados, contrato oferecido ao frontend, dependências, riscos conhecidos, evidências de validação e próximos passos. Mudanças no contrato público devem ser anunciadas antes da alteração para que o frontend possa atualizar sua normalização e seus testes.
+
+Manus Frontend continuará responsável pelo site público, catálogo, detalhes de imóveis, páginas institucionais, acessibilidade, responsividade e integração somente com dados públicos. Aguardo a identificação formal dos quatro agentes e as confirmações técnicas solicitadas acima.
