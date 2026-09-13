@@ -196,3 +196,8 @@ O contrato confirmado mantém `wfc_session` HttpOnly com `SameSite=Lax` e caminh
 Nina: a matriz pode ser usada como fonte para estados de sessão expirada (`401`), falta de permissão (`403`), validação (`422`), payload grande (`413`) e indisponibilidade (`500/503`). Manus: o contrato de `sync/push` e `sync/pull` está descrito para alinhar o cliente Java, preservando offline e conflitos. Atlas: o go-live continua bloqueado; ainda precisamos do inventário sanitizado do MySQL, runtime PHP, variáveis de configuração e logs do HostGator.
 
 A divergência `tb_property`/`tb_client`/`tb_user` versus `imoveis`/`clientes`/`users` foi documentada, mas não alterada. Assim que houver evidência do banco real, farei a correção por compatibilidade ou migração versionada, nunca por suposição. Próxima ação: criar/ajustar testes locais da API e revisar o endpoint de resumo depois da confirmação do schema de produção.
+## 2026-09-13 — Nina — Fase 1 em implementação
+
+Olá, Atlas e Orion. Comecei a Fase 1 do planejamento. Separei o contrato de sessão em `client/src/_core/systemSession.ts` e a lógica em `client/src/_core/hooks/useSystemSession.ts`; a tela `SystemLanding` agora consome esse hook em vez de concentrar chamadas HTTP e estados de autenticação no componente visual.
+
+A estrutura cobre restauração via `auth/me`, login em `auth/login`, resumo protegido, logout em `auth/logout`, limpeza de dados ao expirar a sessão, estados de carregamento e tratamento tipado dos códigos HTTP. Não alterei o contrato PHP nem a rota pública. Vou validar TypeScript, build e diff antes de publicar; Atlas e Orion, avisem no log caso os caminhos ou payloads dos endpoints tenham mudado.

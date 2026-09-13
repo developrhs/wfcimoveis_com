@@ -1,67 +1,12 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { ArrowRight, Building2, CheckCircle2, LockKeyhole, ShieldCheck, Users } from "lucide-react";
-
-type User = { name?: string; username?: string; role?: string };
-type Summary = { properties: number; clients: number; users: number };
-class SystemApiError extends Error {
-  status: number;
-
-  constructor(message: string, status: number) {
-    super(message);
-    this.name = "SystemApiError";
-    this.status = status;
-  }
-}
-
-async function systemApi<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`/sistema/api/v1/${path}`, {
-    ...init,
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(init?.headers ?? {}) },
-  });
-  const body = await response.json().catch(() => ({}));
-  if (!response.ok) throw new SystemApiError(body.error ?? "Não foi possível concluir a operação.", response.status);
-  return body as T;
-}
+import { useSystemSession } from "../_core/hooks/useSystemSession";
 
 export default function SystemLanding() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [identity, setIdentity] = useState("");
   const [password, setPassword] = useState("");
-  const [user, setUser] = useState<User | null>(null);
-  const [summary, setSummary] = useState<Summary | null>(null);
-  const [summaryLoading, setSummaryLoading] = useState(false);
-  const [sessionChecking, setSessionChecking] = useState(true);
-  const [logoutLoading, setLogoutLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [notice, setNotice] = useState("");
-
-  async function loadSummary() {
-    setSummaryLoading(true);
-    try {
-      const result = await systemApi<{ data: Summary }>("summary");
-      setSummary(result.data);
-    } catch (summaryError) {
-      setSummary(null);
-      if (summaryError instanceof SystemApiError && summaryError.status === 401) {
-        setUser(null);
-        setNotice("Sua sessão expirou. Entre novamente para acessar os dados.");
-      }
-    } finally {
-      setSummaryLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    systemApi<{ user: User }>("auth/me")
-      .then(async ({ user: currentUser }) => {
-        setUser(currentUser);
-        await loadSummary();
-      })
-      .catch(() => undefined)
-      .finally(() => setSessionChecking(false));
-  }, []);
+  const { user, summary, summaryLoading, sessionChecking, loginLoading, logoutLoading, error, notice, setError, setNotice, login, logout } = useSystemSession();
 
   function openLogin() {
     setNotice("");
@@ -70,36 +15,10 @@ export default function SystemLanding() {
   }
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setError("");
-    setNotice("");
-    setLoading(true);
-    try {
-      const result = await systemApi<{ user: User }>("auth/login", {
-        method: "POST",
-        body: JSON.stringify({ identity: identity.trim(), password }),
-      });
-      setUser(result.user);
-      await loadSummary();
+    const authenticated = await login(identity, password, event);
+    if (authenticated) {
       setPassword("");
       setLoginOpen(false);
-      setNotice(`Sessão iniciada para ${result.user.name || result.user.username || "usuário"}.`);
-    } catch (loginError) {
-      setError(loginError instanceof Error ? loginError.message : "Não foi possível entrar no sistema.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleLogout() {
-    setLogoutLoading(true);
-    try {
-      await systemApi("auth/logout", { method: "POST" });
-    } finally {
-      setUser(null);
-      setSummary(null);
-      setLogoutLoading(false);
-      setNotice("Sessão encerrada.");
     }
   }
 
@@ -120,7 +39,7 @@ export default function SystemLanding() {
             <h1 className="max-w-3xl text-5xl font-bold leading-[1.05] tracking-[-0.04em] sm:text-6xl">A operação da sua imobiliária em um só lugar.</h1>
             <p className="mt-7 max-w-xl text-lg leading-8 text-slate-300">Um espaço separado do site público para organizar imóveis, clientes, prova social e usuários da equipe.</p>
             <div className="mt-10 flex flex-wrap items-center gap-4">
-              {user ? <button disabled={logoutLoading} onClick={handleLogout} className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3.5 font-semibold shadow-xl shadow-blue-500/20 transition hover:bg-blue-400 disabled:cursor-wait disabled:opacity-60">{logoutLoading ? "Encerrando…" : `Sair de ${user.name || user.username}`} <ArrowRight className="h-4 w-4" /></button> : <button disabled={sessionChecking} onClick={openLogin} className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3.5 font-semibold shadow-xl shadow-blue-500/20 transition hover:bg-blue-400 disabled:cursor-wait disabled:opacity-60">{sessionChecking ? "Verificando sessão…" : "Entrar no sistema"} <ArrowRight className="h-4 w-4" /></button>}
+              {user ? <button disabled={logoutLoading} onClick={logout} className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3.5 font-semibold shadow-xl shadow-blue-500/20 transition hover:bg-blue-400 disabled:cursor-wait disabled:opacity-60">{logoutLoading ? "Encerrando…" : `Sair de ${user.name || user.username}`} <ArrowRight className="h-4 w-4" /></button> : <button disabled={sessionChecking} onClick={openLogin} className="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-5 py-3.5 font-semibold shadow-xl shadow-blue-500/20 transition hover:bg-blue-400 disabled:cursor-wait disabled:opacity-60">{sessionChecking ? "Verificando sessão…" : "Entrar no sistema"} <ArrowRight className="h-4 w-4" /></button>}
               <span className="inline-flex items-center gap-2 rounded-xl border border-white/10 px-5 py-3.5 text-sm text-slate-300"><LockKeyhole className="h-4 w-4 text-blue-300" /> Acesso restrito à equipe</span>
             </div>
             {notice && <p className="mt-5 flex items-center gap-2 text-sm text-emerald-300"><CheckCircle2 className="h-4 w-4" />{notice}</p>}
@@ -137,7 +56,7 @@ export default function SystemLanding() {
         <footer className="border-t border-white/10 pt-5 text-xs text-slate-400">WFCSystem · área administrativa · wfcimoveis.com/sistema</footer>
       </div>
 
-      {loginOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-[#050c1bcc] px-6 backdrop-blur-sm"><section role="dialog" aria-modal="true" aria-labelledby="login-title" className="w-full max-w-md rounded-2xl border border-white/10 bg-[#111f3d] p-7 shadow-2xl"><div className="mb-6"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-300">Acesso restrito</p><h2 id="login-title" className="mt-2 text-2xl font-bold">Entrar no WFCSystem</h2><p className="mt-2 text-sm text-slate-400">Use seu usuário ou e-mail cadastrado.</p></div><form onSubmit={handleLogin} className="space-y-4"><label className="block text-sm font-medium text-slate-200">Usuário ou e-mail<input required value={identity} onChange={(event) => setIdentity(event.target.value)} autoComplete="username" className="mt-2 w-full rounded-lg border border-white/10 bg-[#0b1730] px-3 py-3 text-white outline-none ring-blue-400 focus:ring-2" /></label><label className="block text-sm font-medium text-slate-200">Senha<input required type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="mt-2 w-full rounded-lg border border-white/10 bg-[#0b1730] px-3 py-3 text-white outline-none ring-blue-400 focus:ring-2" /></label>{error && <p role="alert" className="rounded-lg border border-red-300/20 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}<div className="flex gap-3 pt-2"><button type="button" onClick={() => setLoginOpen(false)} className="flex-1 rounded-lg border border-white/10 px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-white/5">Cancelar</button><button disabled={loading} type="submit" className="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-400 disabled:cursor-wait disabled:opacity-60">{loading ? "Entrando…" : "Entrar"}</button></div></form></section></div>}
+      {loginOpen && <div className="fixed inset-0 z-50 grid place-items-center bg-[#050c1bcc] px-6 backdrop-blur-sm"><section role="dialog" aria-modal="true" aria-labelledby="login-title" className="w-full max-w-md rounded-2xl border border-white/10 bg-[#111f3d] p-7 shadow-2xl"><div className="mb-6"><p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-300">Acesso restrito</p><h2 id="login-title" className="mt-2 text-2xl font-bold">Entrar no WFCSystem</h2><p className="mt-2 text-sm text-slate-400">Use seu usuário ou e-mail cadastrado.</p></div><form onSubmit={handleLogin} className="space-y-4"><label className="block text-sm font-medium text-slate-200">Usuário ou e-mail<input required value={identity} onChange={(event) => setIdentity(event.target.value)} autoComplete="username" className="mt-2 w-full rounded-lg border border-white/10 bg-[#0b1730] px-3 py-3 text-white outline-none ring-blue-400 focus:ring-2" /></label><label className="block text-sm font-medium text-slate-200">Senha<input required type="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete="current-password" className="mt-2 w-full rounded-lg border border-white/10 bg-[#0b1730] px-3 py-3 text-white outline-none ring-blue-400 focus:ring-2" /></label>{error && <p role="alert" className="rounded-lg border border-red-300/20 bg-red-400/10 px-3 py-2 text-sm text-red-200">{error}</p>}<div className="flex gap-3 pt-2"><button type="button" onClick={() => setLoginOpen(false)} className="flex-1 rounded-lg border border-white/10 px-4 py-3 text-sm font-semibold text-slate-300 hover:bg-white/5">Cancelar</button><button disabled={loginLoading} type="submit" className="flex-1 rounded-lg bg-blue-500 px-4 py-3 text-sm font-semibold text-white hover:bg-blue-400 disabled:cursor-wait disabled:opacity-60">{loginLoading ? "Entrando…" : "Entrar"}</button></div></form></section></div>}
     </main>
   );
 }
