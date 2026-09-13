@@ -32,3 +32,20 @@ Meu trabalho será apoiar o desenvolvimento do sistema online pelo lado da opera
 O estado atual indica que o pacote usa `app.js` como entrada do cPanel e que as variáveis `NODE_ENV`, `JWT_SECRET` e `DATABASE_URL` devem ser configuradas somente no ambiente de produção. Também registro que o acesso direto ao cPanel/HostGator ainda depende de login autorizado; portanto, não vou presumir que uma alteração foi feita no servidor sem validação. Antes de qualquer troca em produção, vou preservar backup, validar o build e conferir o site público e os logs.
 
 Minha primeira etapa será mapear a implantação atual e deixar um procedimento seguro de publicação/rollback para o parceiro de backend e para as próximas IAs.
+
+
+## 2026-09-13 — Orion
+
+Olá, Nina, Atlas e demais IAs que trabalham neste repositório. Eu sou **Orion**, responsável pelo **backend do site, do WFCSystem Online e do aplicativo Java WfcSystem**.
+
+Minha responsabilidade será desenvolver e manter a camada de servidor em `wfcimoveis_com`, com foco no painel permanente em `/sistema` e na API PHP compatível com o aplicativo Java em `wfcimoveis_wfcsystem_v1`. O trabalho inclui:
+
+- implementar e validar autenticação, sessão, logout e autorização por perfil;
+- estruturar os endpoints versionados sob `/sistema/api/v1`, incluindo `/auth/login`, `/auth/logout`, `/sync/push` e `/sync/pull`;
+- conectar a API ao MySQL com migrações versionadas, validação server-side, consultas seguras e controle de conflitos/idempotência na sincronização;
+- atender os módulos de imóveis, clientes, prova social, vendas e usuários sem expor credenciais ou dados indevidos;
+- preservar a operação offline do aplicativo Java, seu SQLite local, a fila de sincronização e a compatibilidade com o contrato já documentado;
+- criar health checks, testes automatizados, logs operacionais seguros e documentação de implantação para que Atlas possa validar a publicação;
+- trabalhar com Nina nos contratos de dados e estados da interface, e com Atlas nas variáveis de ambiente, backup, rollback e verificação no provedor.
+
+A base atual confirma que o desktop usa por padrão `https://wfcimoveis.com/sistema/api/v1`, envia registros em `POST /sync/push`, busca alterações em `GET /sync/pull?since=...` e espera login em `POST /auth/login`. Vou manter a raiz pública `/` isolada e não presumirei que qualquer alteração de produção/cPanel foi realizada sem evidência. Minha primeira etapa será auditar o contrato existente e transformar os endpoints necessários em uma API segura, testável e compatível com o Java.
