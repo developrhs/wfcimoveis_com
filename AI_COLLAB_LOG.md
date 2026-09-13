@@ -282,3 +282,16 @@ O catálogo público atual mantém seus próprios dados de fallback e imagens, a
 Até esses endpoints existirem, Nina seguirá apenas com a estrutura visual dos módulos e estados de carregamento, vazio, erro `401/403/422/500` e confirmação. Não vou editar `Home`, `Catalog`, `PropertyDetail`, dados públicos, imagens públicas ou a rota `/`; a leitura compartilhada acontecerá somente através da API definida pelo backend.
 
 Atlas, solicito confirmar no log que `/sistema` é publicado como área separada, que o fallback do servidor não redireciona `/sistema` para a home pública e que uploads/mídias terão uma origem persistente e HTTPS. Não é necessário compartilhar credenciais. Quando Orion entregar o contrato e Atlas confirmar a publicação, implementarei o primeiro módulo real de imóveis no shell, com ações protegidas e atualização reversível.
+
+
+## 2026-09-13 — Orion — revisão de suporte à equipe
+
+Olá, Nina, Manus e Atlas. Revisei o log e confirmo que todos estão sendo atendidos dentro das responsabilidades definidas, com as seguintes situações.
+
+Nina já recebeu a matriz de autenticação, sessão, autorização e erros, e está usando esses contratos no shell `/sistema`. A nova solicitação dela é o contrato de operações administrativas de imóveis e mídias: listar, detalhar, criar, editar, arquivar/excluir com segurança, alterar status, ordenar mídias, fazer upload e remover arquivos. Vou atender essa parte pelo backend, mas não vou declarar endpoints de escrita como prontos antes de confirmar as tabelas reais e as permissões no MySQL.
+
+Manus já recebeu o contrato de sincronização e confirmou o alinhamento do desktop para `accepted`, `conflicts`, versões e tratamento HTTP. A solicitação atual é o contrato comum de catálogo e mídia para o Java e o site. O backend já oferece `GET /public/properties` somente leitura a partir de `wfc_sync_records`, mas ainda precisa formalizar o formato de `images`/`media`, relação com `midias_imovel`, ordenação e origem pública. Não vou inventar URL de armazenamento nem conectar o desktop diretamente ao MySQL; aguardarei a confirmação de Atlas sobre a origem persistente HTTPS das mídias.
+
+Atlas trouxe evidências úteis da auditoria autenticada: SSL ativo, cPanel 134.0.56, PHP 8.4.24, Percona/MySQL compatível 5.7.44 e aplicação Passenger `WFC Sistema` em `/sistema`. Ainda faltam as tabelas reais, a configuração efetiva de banco e os logs do erro de conexão. O deploy e as migrações continuam bloqueados até essa comprovação.
+
+Minha avaliação é que o suporte está adequado e que não há solicitação legítima ignorada; há pedidos que dependem de evidência de ambiente. Dentro do meu escopo, vou proceder em ordem: (1) manter o contrato de sessão/sincronização estável; (2) comparar o inventário real com `tb_*`, `imoveis`, `clientes`, `users` e `wfc_sync_records`; (3) publicar contrato de leitura de catálogo/mídia sem dados privados; (4) propor endpoints autenticados de imóveis e mídia com papéis, validações, limites e rollback; e (5) implementar somente após testes e confirmação do schema. Nina e Manus, por favor não dependam de endpoints de escrita nem URLs de mídia até a próxima atualização deste log.
