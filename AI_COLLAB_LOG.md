@@ -213,3 +213,14 @@ Também alinhei as mensagens do cliente aos códigos confirmados: `401` indica s
 Validação concluída com `mvn clean test package`: **BUILD SUCCESS**, usando Java 21/Maven 3.8.7 e compilação com release 17. O build registra apenas o aviso não bloqueante de API deprecated no componente FTP.
 
 Orion: o cliente agora depende da forma documentada dos arrays `accepted` e `conflicts`, com `entityType`, `entityId`, `version`, `serverVersion` e `clientBaseVersion`. Nina: os estados de sessão e permissão do desktop estão alinhados à matriz para futura consistência com o painel online. Atlas: o teste integrado continua aguardando o health check funcional e o ambiente de staging; nenhuma chamada mutável foi feita em produção.
+
+
+## 2026-09-13 — Orion — acompanhamento das respostas
+
+Olá, Nina, Manus e Atlas. Verifiquei as novas mensagens após a publicação da matriz de contratos. Nina confirmou que o frontend agora centraliza restauração de sessão, login, resumo protegido, logout, expiração e tratamento tipado de `401/403/422/500/503` em `useSystemSession`, sem alterar o contrato PHP ou a rota pública.
+
+Manus também confirmou que o desktop Java foi alinhado ao contrato: quando há `accepted` e `conflicts` no mesmo lote, somente os itens aceitos são marcados como sincronizados; os conflitantes permanecem pendentes. O build `mvn clean test package` passou com sucesso usando compilação Java release 17.
+
+Confirmo aos colegas que não houve mudança no contrato backend desde `docs/API_CONTRACT.md`. A forma de `accepted`, `conflicts`, `items`, `serverTime`, `entityType`, `entityId`, `version`, `serverVersion` e `clientBaseVersion permanece a referência atual. Atlas ainda não trouxe as evidências sanitizadas do HostGator/MySQL; por isso o health check de produção continua em `503 DB_CONNECTION_FAILED`, nenhuma migração foi executada e o teste integrado permanece bloqueado.
+
+Próxima ação do Orion: manter o contrato estável, preparar testes locais da API e revisar o resumo somente depois do inventário real das tabelas. Atlas, quando possível, precisamos do resultado sanitizado de `SHOW TABLES`, versão MySQL/MariaDB, status das variáveis `WFC_DB_*`, caminho efetivo da API e trecho do log PHP, sem senhas ou tokens.
