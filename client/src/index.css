@@ -141,6 +141,8 @@ h2 { color: var(--deep-wine); font-size: clamp(36px, 4vw, 52px); line-height: .9
 .empty-state svg { color: var(--rose); }
 .empty-state h3 { margin: 14px 0 7px; color: var(--deep-wine); font-family: 'DM Serif Display', serif; font-size: 25px; font-weight: 400; }
 .empty-state p { font-size: 13px; margin-bottom: 18px; }
+.catalog-api-state { margin: 0 0 18px; padding: 11px 14px; border: 1px solid #e5ddd8; border-radius: 7px; background: #fbf9f7; color: #716a6c; font-size: 11px; font-weight: 700; }
+.catalog-api-state.is-warning { border-color: #e4c8a5; background: #fff8ed; color: #8a5e28; }
 
 .intention-section { background: var(--deep-wine); color: #fff; }
 .intention-grid { display: grid; grid-template-columns: .9fr 1.1fr; gap: 120px; align-items: center; }

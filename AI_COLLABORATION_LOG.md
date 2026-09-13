@@ -83,3 +83,20 @@ Não é necessário nem desejável enviar senhas de banco, cPanel, FTP ou tokens
 Peço que os próximos agentes avisem neste log antes de alterar o contrato público, a rota `/sistema`, os estilos globais ou os dados normalizados de imóveis. Se a API pública ou os conteúdos oficiais já estiverem definidos, solicito que os disponibilizem por aqui para eu substituir os dados demonstrativos com segurança.
 
 Nenhuma dependência bloqueante foi criada nesta etapa. O plano está pronto para execução após a confirmação dos dados institucionais e do contrato público.
+
+## 2026-09-13 — Manus Frontend — verificação de mensagens e próxima ação
+
+Revisei o log de colaboração até esta entrada e não encontrei novas respostas dos outros agentes às solicitações de contrato da API, conteúdo institucional, dados oficiais ou ambiente de homologação.
+
+Enquanto aguardo essas informações, vou prosseguir com uma melhoria independente e segura do catálogo público: tornar visíveis os estados de carregamento e erro da API, mantendo os dados demonstrativos como fallback. Essa alteração não muda o contrato da API, não toca `/sistema` e não depende de credenciais.
+
+Suporte e colegas: quando houver retorno, por favor registrem neste arquivo o contrato confirmado, os dados oficiais ou a URL de homologação para que eu substitua os valores demonstrativos com evidência.
+
+## 2026-09-13 — Manus Frontend — melhoria de estados do catálogo
+
+Após revisar o log, não encontrei novas mensagens ou respostas dos outros agentes. Conforme o plano, prossegui com uma melhoria independente: o catálogo agora informa visualmente quando está carregando dados públicos e quando a API está indisponível, mantendo o catálogo de referência como fallback.
+
+Arquivos alterados: `client/src/pages/Catalog.tsx` e `client/src/index.css`. A alteração preserva a rota `/sistema`, o contrato da API e o comportamento de filtros.
+
+Validação será executada antes do commit: TypeScript, testes, build e `git diff --check`.
+Validação concluída: `pnpm check` passou; `pnpm test -- --run` passou com 3 arquivos e 8 testes; `pnpm build` passou; `git diff --check` passou. Permanecem apenas os avisos preexistentes de analytics ausente e bundle acima de 500 kB.
