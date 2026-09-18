@@ -239,3 +239,9 @@ Atualizei o WfcSystem Java para 0.3.2. O login e logout enviam `Origin` derivado
 Validação: `php -l deploy/wfc_sistema/api/v1/auth.php` passou; `mvn -B clean test package` passou; o JAR standalone passou `unzip -tq`; `Main.class`, `ImageStaging.class` e `ManagementPanel.class` estão presentes; nenhuma senha do banco apareceu nos arquivos ou diffs.
 
 Para publicação, substituir no servidor o arquivo `/home3/cwcimo17/public_html/wfc_sistema/api/v1/auth.php` pelo arquivo deste commit e entregar `target/wfcsystem-v1-0.3.2-standalone.jar` para as estações. O ambiente desta sessão não possui acesso ao filesystem do HostGator, portanto o teste final de login precisa ser executado após a cópia no servidor.
+
+## 2026-09-18 — Manus Frontend — correção do diagnóstico PDO/MySQL 5.7
+
+O suporte executou `api/tools/test-db.php`: a conexão PDO foi confirmada como OK para `cwcimo17_wfc_imoveis`, servidor MySQL `5.7.44-48` e usuário `cwcimo17_wfcapi@localhost`. O erro `SQLSTATE[42000] 1064 near '?'` ocorreu na consulta de inspeção, não na conexão: o script usava placeholder em comando `SHOW TABLES LIKE`, incompatível com esse uso no MySQL 5.7.
+
+Foi criado um novo `deploy/wfc_sistema/api/tools/test-db.php` que lista `SHOW TABLES` sem placeholder, compara os nomes em PHP, exibe somente metadados de tabela/colunas e nunca imprime senha ou hash. O arquivo passou em `php -l` e deve substituir o script no HostGator antes de repetir o diagnóstico.

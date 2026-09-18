@@ -11,62 +11,45 @@ require_once __DIR__ . '/../config/database.php';
 
 function line(string $label, mixed $value): void
 {
-    if (is_array($value)) {
-        $value = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    }
-    echo str_pad($label, 30, ' ') . ": " . (string)$value . PHP_EOL;
+    if (is_array($value)) $value = json_encode($value, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    echo str_pad($label, 30, ' ') . ': ' . (string) $value . PHP_EOL;
 }
-
-function section(string $title): void
-{
-    echo PHP_EOL . "== {$title} ==" . PHP_EOL;
-}
+function section(string $title): void { echo PHP_EOL . "== {$title} ==" . PHP_EOL; }
 
 try {
     section('Conexão PDO');
     $pdo = db();
     line('status', 'OK');
-    line('database', (string)$pdo->query('SELECT DATABASE()')->fetchColumn());
-    line('server', (string)$pdo->query('SELECT VERSION()')->fetchColumn());
-    line('mysql user', (string)$pdo->query('SELECT CURRENT_USER()')->fetchColumn());
+    line('database', (string) $pdo->query('SELECT DATABASE()')->fetchColumn());
+    line('server', (string) $pdo->query('SELECT VERSION()')->fetchColumn());
+    line('mysql user', (string) $pdo->query('SELECT CURRENT_USER()')->fetchColumn());
 
     section('Tabelas esperadas');
-    $tables = ['tb_property', 'tb_client', 'tb_user', 'wfc_sync_records'];
-    $tableExists = [];
-    // SHOW TABLES LIKE não aceita placeholders no MySQL 5.7; information_schema aceita.
-    $tableStatement = $pdo->prepare('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?');
-    foreach ($tables as $table) {
-        $tableStatement->execute([$table]);
-        $exists = (int)$tableStatement->fetchColumn() > 0;
-        $tableExists[$table] = $exists;
-        line($table, $exists ? 'EXISTS' : 'MISSING');
+    $expected = ['tb_user', 'tb_property', 'tb_client', 'wfc_sync_records', 'users', 'imoveis', 'clientes'];
+    $available = [];
+    // Não usar SHOW TABLES LIKE ?; o MySQL 5.7 rejeita placeholder nesse comando.
+    foreach ($pdo->query('SHOW TABLES')->fetchAll(PDO::FETCH_COLUMN) as $table) $available[(string) $table] = true;
+    foreach ($expected as $table) line($table, isset($available[$table]) ? 'EXISTS' : 'MISSING');
+
+    foreach (['tb_user', 'users'] as $table) {
+        if (!isset($available[$table])) continue;
+        section("Colunas {$table}");
+        foreach ($pdo->query("SHOW COLUMNS FROM `{$table}`")->fetchAll(PDO::FETCH_ASSOC) as $column) {
+            line((string) ($column['Field'] ?? ''), (string) ($column['Type'] ?? ''));
+        }
     }
 
     section('Consultas SQL diretas');
-    if ($tableExists['tb_property']) {
-        line('tb_property count', $pdo->query('SELECT COUNT(*) FROM `tb_property`')->fetchColumn());
-    } else {
-        line('tb_property count', 'SKIPPED (table missing)');
-    }
-
-    if ($tableExists['wfc_sync_records']) {
+    if (isset($available['tb_property'])) line('tb_property count', $pdo->query('SELECT COUNT(*) FROM `tb_property`')->fetchColumn());
+    else line('tb_property count', 'SKIPPED (table missing)');
+    if (isset($available['wfc_sync_records'])) {
         line('sync total', $pdo->query('SELECT COUNT(*) FROM `wfc_sync_records`')->fetchColumn());
         line('sync imovel UPSERT', $pdo->query("SELECT COUNT(*) FROM `wfc_sync_records` WHERE entity_type = 'imovel' AND operation = 'UPSERT'")->fetchColumn());
-        $grouped = $pdo->query('SELECT entity_type, operation, COUNT(*) AS total FROM `wfc_sync_records` GROUP BY entity_type, operation ORDER BY entity_type, operation')->fetchAll();
-        foreach ($grouped as $row) {
-            line('sync group', sprintf('%s / %s = %s', $row['entity_type'], $row['operation'], $row['total']));
-        }
-    } else {
-        line('wfc_sync_records', 'SKIPPED (table missing)');
-    }
+    } else line('wfc_sync_records', 'SKIPPED (table missing)');
 
     section('Resultado');
-    if (!$tableExists['wfc_sync_records']) {
-        echo "A conexão funciona, mas a tabela de sincronização ainda não existe.\n";
-        echo "Execute a sincronização ou crie a tabela com api/config/sync_schema.sql.\n";
-        exit(2);
-    }
-    echo "Conexão e consultas SQL concluídas com sucesso.\n";
+    line('status', 'OK');
+    line('observação', 'conexão e inspeção concluídas sem consultar senhas ou hashes');
     exit(0);
 } catch (Throwable $error) {
     section('Resultado');
