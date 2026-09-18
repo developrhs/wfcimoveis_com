@@ -221,3 +221,11 @@ Nenhum valor de `local.php`, senha, token ou credencial foi copiado para o site 
 Validação da integração Java concluída: `mvn -B clean test package` passou no WfcSystem v1 0.3.1; o JAR standalone passou em `unzip -tq` e contém `Main.class`, `ImageStaging.class` e `ManagementPanel.class`. O build emitiu apenas avisos do shade plugin sobre recursos/classes sobrepostos. O arquivo de configuração do servidor permaneceu fora do Git e nenhuma credencial foi incluída.
 
 Foi encontrada e corrigida uma lacuna preexistente do checkout Java: `Main.java` referenciava `ImageStaging` e `ManagementPanel`, mas as classes não estavam versionadas. Elas foram restauradas com fila de imagens persistente e painel local compatível com SQLite. A versão 0.3.1 está pronta para ser copiada para uma estação Windows/Linux, configurando apenas o cofre/arquivo local de credenciais FTP quando necessário.
+
+## 2026-09-18 — Manus Frontend — diagnóstico prioritário do login Java
+
+O diagnóstico confirmou que a mensagem "serviço temporariamente indisponível" não era causada pelo cliente Java nem pela conexão geral com o banco: `GET /health` respondeu HTTP 200 (`{"ok":true,"service":"wfc-api"}`), enquanto `POST /auth/login` respondeu HTTP 500 (`AUTH_UNAVAILABLE`). A implementação PHP assumia rigidamente a tabela e colunas `tb_user_*`, embora o repositório também contenha o schema `users`, gerando erro durante a autenticação.
+
+Preparei uma correção em `deploy/wfc_sistema/api/v1/auth.php`: o endpoint agora detecta as tabelas `tb_user` e `users`, mapeia nomes de colunas compatíveis, normaliza o status ativo, preserva `password_verify` e nunca envia credenciais do banco ao Java. Falha de banco passa a retornar `503` com código controlado, e credencial inválida retorna `401`.
+
+A correção está pronta no repositório, mas o arquivo `/home3/cwcimo17/public_html/wfc_sistema/api/config/local.php` não está disponível neste ambiente e não existe conector de cPanel/FTP configurado para publicação automática. O suporte/infraestrutura precisa publicar os arquivos PHP do commit e testar novamente o login. A senha compartilhada na solicitação deve ser rotacionada no servidor, pois não será armazenada nem usada no cliente Java.
