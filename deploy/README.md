@@ -41,7 +41,7 @@ Código de saída `0` indica conexão e consultas concluídas; `1` indica erro d
 
 A tela inicial é renderizada por `index.php`, usa sessão PHP com cookie HttpOnly/Secure/SameSite e mostra as contagens de `tb_property`, `tb_client` e `tb_user` depois do login.
 
-As rotas de sincronização criam a tabela `wfc_sync_records` na primeira utilização, desde que o usuário MySQL tenha permissão para `CREATE TABLE`. Essa tabela é a fonte de verdade compartilhada para os registros enviados pelo desktop, mantém versão, operação (`UPSERT` ou `DELETE`) e exclusão lógica. O catálogo público lê somente entidades `imovel` com operação `UPSERT`; não expõe dados da equipe.
+As rotas de sincronização criam a tabela `wfc_sync_records` na primeira utilização, desde que o usuário MySQL tenha permissão para `CREATE TABLE`. Essa tabela é a fonte de verdade compartilhada para os registros enviados pelo desktop, mantém versão, operação (`UPSERT` ou `DELETE`) e exclusão lógica. O catálogo público lê entidades `imovel` com operação `UPSERT`; enquanto essa tabela ainda não existir, o endpoint usa diretamente os registros de `tb_property`, sem dados fictícios e sem expor as demais tabelas da equipe.
 
 ## Publicação pelo cPanel
 
