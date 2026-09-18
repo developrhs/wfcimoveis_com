@@ -27,6 +27,18 @@ Esse arquivo é bloqueado pelo `.htaccess` e não deve ser enviado ao GitHub. O 
 - `GET /sistema/api/v1/sync/pull?since=<ISO-8601>` (sessão autenticada; recebe alterações e exclusões)
 - `GET /sistema/api/v1/public/properties` (catálogo público de imóveis sincronizados)
 
+## Diagnóstico da conexão e SQL
+
+Após publicar a pasta `wfc_sistema`, execute o diagnóstico no Terminal do cPanel:
+
+```bash
+php /home3/cwcimo17/public_html/wfc_sistema/api/tools/test-db.php
+```
+
+O script usa a mesma configuração protegida de `api/config/local.php`, testa a conexão PDO e executa consultas SQL somente de leitura para verificar o banco atual, as tabelas esperadas, a quantidade de registros em `tb_property` e os registros sincronizados em `wfc_sync_records`. Ele não imprime senha, não aceita SQL arbitrário e foi bloqueado para acesso HTTP.
+
+Código de saída `0` indica conexão e consultas concluídas; `1` indica erro de conexão/SQL; `2` indica conexão funcionando, mas tabela `wfc_sync_records` ausente.
+
 A tela inicial é renderizada por `index.php`, usa sessão PHP com cookie HttpOnly/Secure/SameSite e mostra as contagens de `tb_property`, `tb_client` e `tb_user` depois do login.
 
 As rotas de sincronização criam a tabela `wfc_sync_records` na primeira utilização, desde que o usuário MySQL tenha permissão para `CREATE TABLE`. Essa tabela é a fonte de verdade compartilhada para os registros enviados pelo desktop, mantém versão, operação (`UPSERT` ou `DELETE`) e exclusão lógica. O catálogo público lê somente entidades `imovel` com operação `UPSERT`; não expõe dados da equipe.
