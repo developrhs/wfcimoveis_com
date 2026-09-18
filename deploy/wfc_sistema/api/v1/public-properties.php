@@ -21,25 +21,25 @@ function first_value(array $row, array $keys, mixed $default = null): mixed
 
 function direct_property(array $row, int $fallbackId): array
 {
-  $id = first_value($row, ['id', 'codigo', 'code', 'property_id', 'imovel_id'], (string)$fallbackId);
-  $priceCents = first_value($row, ['price_cents', 'valor_centavos', 'preco_centavos', 'valor_cents']);
+  $id = first_value($row, ['tb_property_code', 'tb_property_id', 'id', 'codigo', 'code', 'property_id', 'imovel_id'], (string)$fallbackId);
+  $priceCents = first_value($row, ['tb_property_price_cents', 'price_cents', 'valor_centavos', 'preco_centavos', 'valor_cents']);
   if ($priceCents === null) {
     $price = first_value($row, ['price', 'preco', 'valor', 'valor_venda'], 0);
     $priceCents = is_numeric($price) ? (float)$price * (str_contains((string)$price, '.') ? 100 : 1) : 0;
   }
   return [
     'id' => (string)$id,
-    'title' => (string)first_value($row, ['title', 'titulo', 'nome', 'description', 'descricao'], 'Imóvel WFC'),
-    'type' => (string)first_value($row, ['type', 'tipo', 'property_type', 'tipo_imovel'], 'Imóvel'),
-    'saleType' => (string)first_value($row, ['saleType', 'sale_type', 'tipoVenda', 'tipo_venda', 'modalidade'], 'Consulte'),
-    'location' => (string)first_value($row, ['location', 'localizacao', 'localização', 'endereco', 'endereço', 'bairro', 'cidade'], ''),
+    'title' => (string)first_value($row, ['tb_property_title', 'title', 'titulo', 'nome', 'description', 'descricao'], 'Imóvel WFC'),
+    'type' => (string)first_value($row, ['tb_property_type_id', 'type', 'tipo', 'property_type', 'tipo_imovel'], 'Imóvel'),
+    'saleType' => (string)first_value($row, ['tb_sale_type_id', 'saleType', 'sale_type', 'tipoVenda', 'tipo_venda', 'modalidade'], 'Consulte'),
+    'location' => (string)first_value($row, ['tb_property_location', 'location', 'localizacao', 'localização', 'endereco', 'endereço', 'bairro', 'cidade'], ''),
     'price' => (int)round((float)$priceCents),
-    'status' => (string)first_value($row, ['status', 'situacao', 'situação'], 'disponivel'),
-    'available' => (int)first_value($row, ['available', 'disponivel', 'disponíveis', 'estoque', 'quantidade'], 1),
-    'total' => first_value($row, ['total', 'estoque_total', 'quantidade_total']),
-    'bedrooms' => (int)first_value($row, ['bedrooms', 'quartos', 'dormitorios', 'dormitórios'], 0),
-    'baths' => (int)first_value($row, ['baths', 'banheiros', 'wc'], 0),
-    'area' => (string)first_value($row, ['area', 'metragem', 'area_m2', 'metros_quadrados'], ''),
+    'status' => (string)first_value($row, ['tb_property_status', 'status', 'situacao', 'situação'], 'disponivel'),
+    'available' => (int)first_value($row, ['tb_property_available_quantity', 'available', 'disponivel', 'disponíveis', 'estoque', 'quantidade'], 1),
+    'total' => first_value($row, ['tb_property_total_quantity', 'total', 'estoque_total', 'quantidade_total']),
+    'bedrooms' => (int)first_value($row, ['tb_property_bedroom', 'bedrooms', 'quartos', 'dormitorios', 'dormitórios'], 0),
+    'baths' => (int)first_value($row, ['tb_property_bathroom', 'baths', 'banheiros', 'wc'], 0),
+    'area' => (string)first_value($row, ['tb_property_area', 'area', 'metragem', 'area_m2', 'metros_quadrados'], ''),
     'image' => first_value($row, ['image', 'imagem', 'foto', 'image_url', 'imagem_url', 'foto_url']),
     'tag' => (string)first_value($row, ['tag', 'destaque', 'label'], 'WFC Imóveis'),
   ];
