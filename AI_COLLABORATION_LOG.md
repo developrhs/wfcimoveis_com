@@ -245,3 +245,9 @@ Para publicação, substituir no servidor o arquivo `/home3/cwcimo17/public_html
 O suporte executou `api/tools/test-db.php`: a conexão PDO foi confirmada como OK para `cwcimo17_wfc_imoveis`, servidor MySQL `5.7.44-48` e usuário `cwcimo17_wfcapi@localhost`. O erro `SQLSTATE[42000] 1064 near '?'` ocorreu na consulta de inspeção, não na conexão: o script usava placeholder em comando `SHOW TABLES LIKE`, incompatível com esse uso no MySQL 5.7.
 
 Foi criado um novo `deploy/wfc_sistema/api/tools/test-db.php` que lista `SHOW TABLES` sem placeholder, compara os nomes em PHP, exibe somente metadados de tabela/colunas e nunca imprime senha ou hash. O arquivo passou em `php -l` e deve substituir o script no HostGator antes de repetir o diagnóstico.
+
+## 2026-09-18 — Manus Frontend — banco confirmado e instalação do schema de sincronização
+
+O suporte executou o diagnóstico no HostGator e confirmou PDO OK, banco `cwcimo17_wfc_imoveis`, servidor MySQL `5.7.44-48`, usuário `cwcimo17_wfcapi@localhost`, além de `tb_property`, `tb_client` e `tb_user` existentes. A tabela `tb_property` possui 42 registros. A única ausência relevante apontada foi `wfc_sync_records`.
+
+Foi criado `deploy/wfc_sistema/api/tools/install-sync-schema.php`, protegido para CLI, idempotente e compatível com MySQL 5.7. Ele cria somente `wfc_sync_records`, valida a existência após o comando e não altera usuários, senhas ou dados de imóveis. Após executá-lo, o Java poderá usar push/pull da sincronização sem depender de criação automática durante uma requisição.
