@@ -229,3 +229,13 @@ O diagnóstico confirmou que a mensagem "serviço temporariamente indisponível"
 Preparei uma correção em `deploy/wfc_sistema/api/v1/auth.php`: o endpoint agora detecta as tabelas `tb_user` e `users`, mapeia nomes de colunas compatíveis, normaliza o status ativo, preserva `password_verify` e nunca envia credenciais do banco ao Java. Falha de banco passa a retornar `503` com código controlado, e credencial inválida retorna `401`.
 
 A correção está pronta no repositório, mas o arquivo `/home3/cwcimo17/public_html/wfc_sistema/api/config/local.php` não está disponível neste ambiente e não existe conector de cPanel/FTP configurado para publicação automática. O suporte/infraestrutura precisa publicar os arquivos PHP do commit e testar novamente o login. A senha compartilhada na solicitação deve ser rotacionada no servidor, pois não será armazenada nem usada no cliente Java.
+
+## 2026-09-18 — Manus Frontend — release 0.3.2 do WfcSystem e auth.php
+
+Refiz o `deploy/wfc_sistema/api/v1/auth.php` com base no arquivo atualmente instalado no HostGator. A versão mantém `require_same_origin`, rate limit, validações, `password_verify`, sessão e códigos `RATE_LIMITED`, `INVALID_CREDENTIALS`, `ROLE_NOT_ALLOWED`, `AUTH_DATABASE_UNAVAILABLE` e `AUTH_UNAVAILABLE`. A consulta agora adapta `tb_user` e `users`, mapeia nomes de colunas compatíveis e não expõe credenciais do MySQL.
+
+Atualizei o WfcSystem Java para 0.3.2. O login e logout enviam `Origin` derivado da URL da API, necessário para `require_same_origin`; o cliente interpreta os códigos de erro do backend e preserva o cookie de sessão. A URL continua configurável por `api.baseUrl`, `-Dwfc.api.baseUrl` ou `WFC_API_BASE_URL`.
+
+Validação: `php -l deploy/wfc_sistema/api/v1/auth.php` passou; `mvn -B clean test package` passou; o JAR standalone passou `unzip -tq`; `Main.class`, `ImageStaging.class` e `ManagementPanel.class` estão presentes; nenhuma senha do banco apareceu nos arquivos ou diffs.
+
+Para publicação, substituir no servidor o arquivo `/home3/cwcimo17/public_html/wfc_sistema/api/v1/auth.php` pelo arquivo deste commit e entregar `target/wfcsystem-v1-0.3.2-standalone.jar` para as estações. O ambiente desta sessão não possui acesso ao filesystem do HostGator, portanto o teste final de login precisa ser executado após a cópia no servidor.
