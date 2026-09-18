@@ -33,10 +33,11 @@ try {
     section('Tabelas esperadas');
     $tables = ['tb_property', 'tb_client', 'tb_user', 'wfc_sync_records'];
     $tableExists = [];
-    $tableStatement = $pdo->prepare('SHOW TABLES LIKE ?');
+    // SHOW TABLES LIKE não aceita placeholders no MySQL 5.7; information_schema aceita.
+    $tableStatement = $pdo->prepare('SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = ?');
     foreach ($tables as $table) {
         $tableStatement->execute([$table]);
-        $exists = $tableStatement->fetchColumn() !== false;
+        $exists = (int)$tableStatement->fetchColumn() > 0;
         $tableExists[$table] = $exists;
         line($table, $exists ? 'EXISTS' : 'MISSING');
     }
