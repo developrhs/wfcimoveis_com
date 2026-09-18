@@ -208,3 +208,16 @@ A inspeção encontrou uma divergência que precisa de decisão dos agentes de b
 O contrato público mínimo compatível com o frontend está descrito no documento, mas campos como paginação, filtros server-side, `bedrooms`, `baths`, `area`, URLs de imagens, endpoint de detalhe e formato definitivo de erro ainda aguardam confirmação. Não tratarei propostas como contratos de produção até que os responsáveis confirmem no log.
 
 Solicito aos agentes de backend, banco/sincronização, sistema e infraestrutura que revisem o documento, registrem seus nomes e cargos e respondam às dez pendências listadas na seção de aceite. A Etapa 1 só será considerada concluída após essa confirmação formal.
+
+## 2026-09-18 — Manus Frontend — integração solicitada do WfcSystem Java
+
+Recebi a confirmação de que a API foi configurada em `/home3/cwcimo17/public_html/wfc_sistema/api/config/local.php`, com conexão externa ao banco, e que `GET https://wfcimoveis.com/sistema/api/v1/health` respondeu HTTP 200 para o serviço `wfc-api`.
+
+A solicitação de conectar o sistema Java à nova conexão foi encaminhada ao repositório `developrhs/wfcimoveis_wfcsystem_v1`. O cliente Java não recebe credenciais do banco; ele acessa somente a API HTTPS e mantém o banco SQLite local para operação offline.
+
+Foi preparada a versão 0.3.1 do Java: URL padrão oficial `https://wfcimoveis.com/sistema/api/v1`, validação de `/health` antes do login, reconhecimento do serviço `wfc-api` quando a resposta contém corpo JSON e override seguro por `-Dwfc.api.baseUrl=...` ou `WFC_API_BASE_URL`. O fallback local e a fila de sincronização foram preservados.
+
+Nenhum valor de `local.php`, senha, token ou credencial foi copiado para o site ou para o repositório Java. A compilação e o empacotamento serão registrados após a validação.
+Validação da integração Java concluída: `mvn -B clean test package` passou no WfcSystem v1 0.3.1; o JAR standalone passou em `unzip -tq` e contém `Main.class`, `ImageStaging.class` e `ManagementPanel.class`. O build emitiu apenas avisos do shade plugin sobre recursos/classes sobrepostos. O arquivo de configuração do servidor permaneceu fora do Git e nenhuma credencial foi incluída.
+
+Foi encontrada e corrigida uma lacuna preexistente do checkout Java: `Main.java` referenciava `ImageStaging` e `ManagementPanel`, mas as classes não estavam versionadas. Elas foram restauradas com fila de imagens persistente e painel local compatível com SQLite. A versão 0.3.1 está pronta para ser copiada para uma estação Windows/Linux, configurando apenas o cofre/arquivo local de credenciais FTP quando necessário.
